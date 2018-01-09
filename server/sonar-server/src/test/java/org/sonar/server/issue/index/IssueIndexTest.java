@@ -91,9 +91,9 @@ public class IssueIndexTest {
 
   @Rule
   public EsTester es = new EsTester(
-    new IssueIndexDefinition(settings.asConfig()),
+    IssueIndexDefinition.createForTest(new MapSettings().asConfig()),
     new ViewIndexDefinition(settings.asConfig()),
-    new RuleIndexDefinition(settings.asConfig()));
+    RuleIndexDefinition.createForTest(new MapSettings().asConfig()));
   @Rule
   public UserSessionRule userSessionRule = UserSessionRule.standalone();
   @Rule

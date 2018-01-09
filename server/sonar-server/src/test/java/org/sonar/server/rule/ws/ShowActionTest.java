@@ -92,7 +92,7 @@ public class ShowActionTest {
   public DbTester dbTester = DbTester.create();
   @org.junit.Rule
   public EsTester esTester = new EsTester(
-    new RuleIndexDefinition(new MapSettings().asConfig()));
+    RuleIndexDefinition.createForTest(new MapSettings().asConfig()));
   @org.junit.Rule
   public ExpectedException thrown = ExpectedException.none();
 

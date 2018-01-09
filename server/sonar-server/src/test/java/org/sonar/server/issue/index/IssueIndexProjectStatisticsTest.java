@@ -50,9 +50,8 @@ import static org.sonar.server.issue.IssueDocTesting.newDoc;
 public class IssueIndexProjectStatisticsTest {
 
   private System2 system2 = mock(System2.class);
-  private MapSettings settings = new MapSettings();
   @Rule
-  public EsTester esTester = new EsTester(new IssueIndexDefinition(settings.asConfig()));
+  public EsTester esTester = new EsTester(IssueIndexDefinition.createForTest(new MapSettings().asConfig()));
   @Rule
   public UserSessionRule userSessionRule = UserSessionRule.standalone();
 

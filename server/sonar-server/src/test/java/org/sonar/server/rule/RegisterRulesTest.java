@@ -104,7 +104,7 @@ public class RegisterRulesTest {
   @org.junit.Rule
   public DbTester dbTester = DbTester.create(system);
   @org.junit.Rule
-  public EsTester esTester = new EsTester(new RuleIndexDefinition(new MapSettings().asConfig()));
+  public EsTester esTester = new EsTester(RuleIndexDefinition.createForTest(new MapSettings().asConfig()));
   @org.junit.Rule
   public LogTester logTester = new LogTester();
 

@@ -19,6 +19,7 @@
  */
 package org.sonar.server.health;
 
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.mockito.Mockito;
@@ -28,6 +29,7 @@ import org.sonar.server.es.EsTester;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 
+@Ignore
 public class EsStatusNodeCheckTest {
 
   @Rule

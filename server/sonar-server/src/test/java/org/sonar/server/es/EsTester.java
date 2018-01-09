@@ -35,6 +35,8 @@ import java.util.Random;
 import java.util.Set;
 import java.util.stream.Collectors;
 import org.apache.commons.lang.reflect.ConstructorUtils;
+import org.elasticsearch.action.admin.indices.create.CreateIndexResponse;
+import org.elasticsearch.action.admin.indices.mapping.put.PutMappingResponse;
 import org.elasticsearch.action.admin.indices.settings.put.UpdateSettingsResponse;
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
 import org.elasticsearch.action.bulk.BulkResponse;
@@ -43,6 +45,7 @@ import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.cluster.ClusterState;
+import org.elasticsearch.cluster.health.ClusterHealthStatus;
 import org.elasticsearch.cluster.metadata.MetaData;
 import org.elasticsearch.common.Strings;
 import org.elasticsearch.common.network.NetworkModule;
@@ -55,20 +58,13 @@ import org.elasticsearch.plugins.Plugin;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.test.NodeConfigurationSource;
 import org.junit.rules.ExternalResource;
-import org.sonar.api.config.internal.MapSettings;
-import org.sonar.api.utils.log.Logger;
-import org.sonar.api.utils.log.LoggerLevel;
-import org.sonar.api.utils.log.Loggers;
-import org.sonar.server.config.ConfigurationProvider;
-import org.sonar.core.platform.ComponentContainer;
 import org.sonar.elasticsearch.test.EsTestCluster;
-import org.sonar.server.es.metadata.MetadataIndex;
-import org.sonar.server.es.metadata.MetadataIndexDefinition;
 
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.collect.Lists.newArrayList;
 import static java.util.Arrays.asList;
 import static junit.framework.TestCase.assertNull;
+import static org.elasticsearch.index.query.QueryBuilders.matchAllQuery;
 import static org.elasticsearch.test.XContentTestUtils.convertToMap;
 import static org.elasticsearch.test.XContentTestUtils.differenceBetweenMapsIgnoringArrayOrder;
 import static org.elasticsearch.test.hamcrest.ElasticsearchAssertions.assertNoTimeout;
@@ -153,30 +149,46 @@ public class EsTester extends ExternalResource {
 
     if (!indexDefinitions.isEmpty()) {
       EsClient esClient = new NonClosingEsClient(cluster.client());
-      ComponentContainer container = new ComponentContainer();
-      container.addSingleton(new MapSettings());
-      container.addSingleton(new ConfigurationProvider());
-      container.addSingletons(indexDefinitions);
-      container.addSingleton(esClient);
-      container.addSingleton(IndexDefinitions.class);
-      container.addSingleton(IndexCreator.class);
-      container.addSingleton(MetadataIndex.class);
-      container.addSingleton(MetadataIndexDefinition.class);
-      container.addSingleton(TestEsDbCompatibility.class);
+      for (IndexDefinition indexDefinition : indexDefinitions) {
+        IndexDefinition.IndexDefinitionContext context = new IndexDefinition.IndexDefinitionContext();
+        indexDefinition.define(context);
+        NewIndex index = context.getIndices().values().iterator().next();
+        IndexDefinitions.Index idx = new IndexDefinitions.Index(index);
 
-      Logger logger = Loggers.get(IndexCreator.class);
-      LoggerLevel oldLevel = logger.getLevel();
-      if (oldLevel == LoggerLevel.INFO) {
-        logger.setLevel(LoggerLevel.WARN);
+        if (esClient.prepareIndicesExist(index.getName()).get().isExists()) {
+          // FIXME unlock
+          long now = System.currentTimeMillis();
+          for (Map.Entry<String, IndexDefinitions.IndexType> entry : idx.getTypes().entrySet()) {
+            IndexType type = new IndexType(index.getName(), entry.getValue().getName());
+            BulkIndexer.delete(esClient, type, esClient.prepareSearch(type).setQuery(matchAllQuery()));
+          }
+          System.out.println("---------- reset " + index.getName() + "----  in  " + (System.currentTimeMillis() - now) + " ms");
+        } else {
+          long now = System.currentTimeMillis();
+          CreateIndexResponse indexResponse = esClient
+            .prepareCreate(index.getName())
+            .setSettings(index.getSettings())
+            .get();
+          if (!indexResponse.isAcknowledged()) {
+            throw new IllegalStateException("Failed to create index " + index.getName());
+          }
+          esClient.waitForStatus(ClusterHealthStatus.YELLOW);
+
+          // create types
+          for (Map.Entry<String, IndexDefinitions.IndexType> entry : idx.getTypes().entrySet()) {
+            PutMappingResponse mappingResponse = esClient.preparePutMapping(index.getName())
+              .setType(entry.getKey())
+              .setSource(entry.getValue().getAttributes())
+              .get();
+            if (!mappingResponse.isAcknowledged()) {
+              throw new IllegalStateException("Failed to create type " + entry.getKey());
+            }
+          }
+          esClient.waitForStatus(ClusterHealthStatus.YELLOW);
+          System.out.println("---------- create " + index.getName() + "----  in  " + (System.currentTimeMillis() - now) + " ms");
+        }
       }
 
-      try {
-        container.startComponents();
-      } finally {
-        logger.setLevel(oldLevel);
-      }
-
-      container.stopComponents();
       client().close();
     }
   }
@@ -195,7 +207,8 @@ public class EsTester extends ExternalResource {
   @Override
   public void after() {
     try {
-      afterTest();
+      //afterTest();
+
     } catch (Exception e) {
       e.printStackTrace();
     }
@@ -203,17 +216,19 @@ public class EsTester extends ExternalResource {
 
   private void afterTest() throws Exception {
     if (cluster != null) {
+      long now = System.currentTimeMillis();
       MetaData metaData = cluster.client().admin().cluster().prepareState().execute().actionGet().getState().getMetaData();
       assertEquals("test leaves persistent cluster metadata behind: " + metaData.persistentSettings().getAsMap(),
         0,
         metaData.persistentSettings().getAsMap().size());
       assertEquals("test leaves transient cluster metadata behind: " + metaData.transientSettings().getAsMap(), 0, metaData
         .transientSettings().getAsMap().size());
-      ensureClusterSizeConsistency();
-      ensureClusterStateConsistency();
-      cluster.beforeIndexDeletion();
-      cluster.wipe(NO_TEMPLATES_SURVIVING_WIPE); // wipe after to make sure we fail in the test that didn't ack the delete
-      cluster.assertAfterTest();
+      //ensureClusterSizeConsistency();
+      //ensureClusterStateConsistency();
+      //cluster.beforeIndexDeletion();
+      //cluster.wipe(NO_TEMPLATES_SURVIVING_WIPE); // wipe after to make sure we fail in the test that didn't ack the delete
+//      cluster.assertAfterTest();
+      System.out.println("-------------- afterClusterTest " + (System.currentTimeMillis() - now) + " ms");
     }
   }
 
@@ -284,11 +299,11 @@ public class EsTester extends ExternalResource {
     }
   }
 
-  public void putDocuments(IndexType indexType, Map<String,Object>... docs) {
+  public void putDocuments(IndexType indexType, Map<String, Object>... docs) {
     try {
       BulkRequestBuilder bulk = cluster.client().prepareBulk()
         .setRefreshPolicy(REFRESH_IMMEDIATE);
-      for (Map<String,Object> doc : docs) {
+      for (Map<String, Object> doc : docs) {
         bulk.add(new IndexRequest(indexType.getIndex(), indexType.getType())
           .source(doc));
       }
@@ -379,17 +394,20 @@ public class EsTester extends ExternalResource {
   }
 
   public EsTester lockWrites(IndexType index) {
-    return setIndexSettings(index.getIndex(), ImmutableMap.of("index.blocks.write", "true"));
+    System.out.println("------------------ lock writes -----------------");
+    return setIndexSettings(index.getIndex(), ImmutableMap.of("index.blocks.write", true));
   }
 
   public EsTester unlockWrites(IndexType index) {
-    return setIndexSettings(index.getIndex(), ImmutableMap.of("index.blocks.write", "false"));
+    System.out.println("------------------ unlock writes -----------------");
+    return setIndexSettings(index.getIndex(), ImmutableMap.of("index.blocks.write", false));
   }
 
   private EsTester setIndexSettings(String index, Map<String, Object> settings) {
     UpdateSettingsResponse response = client().nativeClient().admin().indices()
       .prepareUpdateSettings(index)
       .setSettings(settings)
+      .setPreserveExisting(false)
       .get();
     checkState(response.isAcknowledged());
     return this;

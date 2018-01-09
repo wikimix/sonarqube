@@ -56,7 +56,7 @@ public class DeleteActionTest {
   @Rule
   public DbTester dbTester = DbTester.create();
   @Rule
-  public EsTester esTester = new EsTester(new RuleIndexDefinition(new MapSettings().asConfig()));
+  public EsTester esTester = new EsTester(RuleIndexDefinition.createForTest(new MapSettings().asConfig()));
   @Rule
   public ExpectedException thrown = ExpectedException.none();
 

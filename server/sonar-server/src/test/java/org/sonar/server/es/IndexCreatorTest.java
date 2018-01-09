@@ -27,6 +27,7 @@ import javax.annotation.CheckForNull;
 import org.elasticsearch.action.support.WriteRequest;
 import org.elasticsearch.cluster.metadata.MappingMetaData;
 import org.elasticsearch.common.collect.ImmutableOpenMap;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.sonar.api.config.internal.MapSettings;
@@ -39,6 +40,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.elasticsearch.action.support.WriteRequest.RefreshPolicy.IMMEDIATE;
 import static org.sonar.server.es.NewIndex.SettingsConfiguration.newBuilder;
 
+@Ignore
 public class IndexCreatorTest {
 
   private static final NewIndex.SettingsConfiguration SETTINGS_CONFIGURATION = newBuilder(new MapSettings().asConfig()).build();

@@ -63,7 +63,7 @@ public class ShowActionTest {
   private static Languages LANGUAGES = new Languages(XOO1, XOO2);
 
   @Rule
-  public EsTester es = new EsTester(new RuleIndexDefinition(new MapSettings().asConfig()));
+  public EsTester es = new EsTester(RuleIndexDefinition.createForTest(new MapSettings().asConfig()));
   @Rule
   public DbTester db = DbTester.create();
   @Rule

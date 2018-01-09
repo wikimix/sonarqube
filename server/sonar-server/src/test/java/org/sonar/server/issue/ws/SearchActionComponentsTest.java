@@ -89,7 +89,7 @@ public class SearchActionComponentsTest {
   @Rule
   public DbTester db = DbTester.create();
   @Rule
-  public EsTester es = new EsTester(new IssueIndexDefinition(new MapSettings().asConfig()), new ViewIndexDefinition(new MapSettings().asConfig()));
+  public EsTester es = new EsTester(IssueIndexDefinition.createForTest(new MapSettings().asConfig()), new ViewIndexDefinition(new MapSettings().asConfig()));
 
   private DbClient dbClient = db.getDbClient();
   private IssueIndex issueIndex = new IssueIndex(es.client(), System2.INSTANCE, userSession, new AuthorizationTypeSupport(userSession));

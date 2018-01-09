@@ -21,6 +21,7 @@ package org.sonar.server.es.metadata;
 
 import java.util.Optional;
 import javax.annotation.Nullable;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -34,6 +35,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+@Ignore
 public class EsDbCompatibilityImplTest {
   @Rule
   public ExpectedException expectedException = ExpectedException.none();

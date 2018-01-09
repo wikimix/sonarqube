@@ -74,7 +74,7 @@ public class InheritanceActionTest {
   @Rule
   public DbTester dbTester = DbTester.create();
   @Rule
-  public EsTester es = new EsTester(new RuleIndexDefinition(new MapSettings().asConfig()));
+  public EsTester es = new EsTester(RuleIndexDefinition.createForTest(new MapSettings().asConfig()));
   @Rule
   public UserSessionRule userSession = UserSessionRule.standalone();
 

@@ -23,6 +23,7 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.Random;
 import java.util.stream.IntStream;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -41,6 +42,7 @@ import static org.sonar.process.ProcessProperties.Property.CLUSTER_NODE_HOST;
 import static org.sonar.process.ProcessProperties.Property.CLUSTER_NODE_NAME;
 import static org.sonar.process.ProcessProperties.Property.CLUSTER_NODE_PORT;
 
+@Ignore
 public class NodeHealthProviderImplTest {
   @Rule
   public ExpectedException expectedException = ExpectedException.none();

@@ -101,7 +101,7 @@ public class BulkChangeActionTest {
   @Rule
   public DbTester db = DbTester.create(system2);
   @Rule
-  public EsTester es = new EsTester(new IssueIndexDefinition(new MapSettings().asConfig()));
+  public EsTester es = new EsTester(IssueIndexDefinition.createForTest(new MapSettings().asConfig()));
   @Rule
   public UserSessionRule userSession = UserSessionRule.standalone();
 

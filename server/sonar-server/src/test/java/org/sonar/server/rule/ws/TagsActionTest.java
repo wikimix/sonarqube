@@ -50,7 +50,7 @@ public class TagsActionTest {
   @Rule
   public DbTester db = DbTester.create();
   @Rule
-  public EsTester es = new EsTester(new RuleIndexDefinition(new MapSettings().asConfig()));
+  public EsTester es = new EsTester(RuleIndexDefinition.createForTest(new MapSettings().asConfig()));
 
   private DbClient dbClient = db.getDbClient();
   private EsClient esClient = es.client();

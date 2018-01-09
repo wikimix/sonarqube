@@ -79,7 +79,7 @@ public class QProfilesWsMediumTest {
   public UserSessionRule userSessionRule = UserSessionRule.standalone()
     .logIn().setRoot();
   @Rule
-  public EsTester esTester = new EsTester(new RuleIndexDefinition(new MapSettings().asConfig()));
+  public EsTester esTester = new EsTester(RuleIndexDefinition.createForTest(new MapSettings().asConfig()));
   @Rule
   public DbTester dbTester = DbTester.create();
 

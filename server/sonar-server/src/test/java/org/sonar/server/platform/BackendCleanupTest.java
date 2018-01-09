@@ -50,8 +50,8 @@ public class BackendCleanupTest {
 
   @Rule
   public EsTester esTester = new EsTester(
-    new RuleIndexDefinition(new MapSettings().asConfig()),
-    new IssueIndexDefinition(new MapSettings().asConfig()),
+    RuleIndexDefinition.createForTest(new MapSettings().asConfig()),
+    IssueIndexDefinition.createForTest(new MapSettings().asConfig()),
     new ViewIndexDefinition(new MapSettings().asConfig()),
     new ProjectMeasuresIndexDefinition(new MapSettings().asConfig()),
     new ComponentIndexDefinition(new MapSettings().asConfig()));

@@ -19,6 +19,7 @@
  */
 package org.sonar.server.es.metadata;
 
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.sonar.server.es.EsTester;
@@ -28,6 +29,7 @@ import org.sonar.server.es.IndexType;
 import static org.apache.commons.lang.RandomStringUtils.randomAlphanumeric;
 import static org.assertj.core.api.Assertions.assertThat;
 
+@Ignore
 public class MetadataIndexTest {
 
   @Rule

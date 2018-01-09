@@ -21,6 +21,7 @@ package org.sonar.server.platform.monitoring;
 
 import org.elasticsearch.ElasticsearchException;
 import org.elasticsearch.cluster.health.ClusterHealthStatus;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.sonar.api.config.internal.MapSettings;
@@ -35,6 +36,7 @@ import static org.mockito.Mockito.when;
 import static org.sonar.process.systeminfo.SystemInfoUtils.attribute;
 import static org.sonar.server.platform.monitoring.SystemInfoTesting.assertThatAttributeIs;
 
+@Ignore
 public class EsStateSectionTest {
 
   @Rule

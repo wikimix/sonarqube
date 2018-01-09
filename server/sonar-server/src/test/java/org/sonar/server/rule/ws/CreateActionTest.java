@@ -72,7 +72,7 @@ public class CreateActionTest {
   public DbTester db = DbTester.create(system2);
 
   @Rule
-  public EsTester es = new EsTester(new RuleIndexDefinition(new MapSettings().asConfig()));
+  public EsTester es = new EsTester(RuleIndexDefinition.createForTest(new MapSettings().asConfig()));
 
   private DefaultOrganizationProvider defaultOrganizationProvider = TestDefaultOrganizationProvider.from(db);
 

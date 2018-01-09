@@ -79,7 +79,7 @@ public class SetSeverityActionTest {
   @Rule
   public DbTester dbTester = DbTester.create();
   @Rule
-  public EsTester esTester = new EsTester(new IssueIndexDefinition(new MapSettings().asConfig()));
+  public EsTester esTester = new EsTester(IssueIndexDefinition.createForTest(new MapSettings().asConfig()));
   @Rule
   public UserSessionRule userSession = UserSessionRule.standalone();
 

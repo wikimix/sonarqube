@@ -127,6 +127,7 @@ public class ActiveRuleIndexerTest {
 
     EsQueueDto expectedItem = EsQueueDto.create(INDEX_TYPE_ACTIVE_RULE.format(), "" + ar.getId(), "activeRuleId", valueOf(ar.getRuleId()));
     assertThatEsQueueContainsExactly(expectedItem);
+    es.unlockWrites(INDEX_TYPE_ACTIVE_RULE);
   }
 
   @Test

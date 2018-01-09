@@ -27,6 +27,7 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import org.elasticsearch.search.SearchHit;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -58,6 +59,7 @@ import static org.sonar.server.issue.IssueDocTesting.newDoc;
 import static org.sonar.server.issue.index.IssueIndexDefinition.INDEX_TYPE_ISSUE;
 import static org.sonar.server.permission.index.AuthorizationTypeSupport.TYPE_AUTHORIZATION;
 
+@Ignore
 public class IssueIndexerTest {
 
   @Rule
@@ -148,6 +150,7 @@ public class IssueIndexerTest {
     } finally {
       assertThatIndexHasSize(0);
       assertThatEsQueueTableHasSize(0);
+      es.unlockWrites(INDEX_TYPE_ISSUE);
     }
   }
 
@@ -198,6 +201,7 @@ public class IssueIndexerTest {
     } finally {
       assertThatIndexHasSize(0);
       assertThatEsQueueTableHasSize(0);
+      es.unlockWrites(INDEX_TYPE_ISSUE);
     }
   }
 
@@ -431,6 +435,7 @@ public class IssueIndexerTest {
     } finally {
       assertThatIndexHasOnly("Issue1");
       assertThatEsQueueTableHasSize(0);
+      es.unlockWrites(INDEX_TYPE_ISSUE);
     }
   }
 
