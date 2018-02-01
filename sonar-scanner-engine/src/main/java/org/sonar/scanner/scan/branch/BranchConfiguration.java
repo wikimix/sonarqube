@@ -64,9 +64,9 @@ public interface BranchConfiguration {
   String branchBase();
 
   /**
-   * The key of the pull request.
+   * The id of the pull request.
    *
    * @throws IllegalStateException if this branch configuration is not a pull request.
    */
-  String pullRequestKey();
+  String pullRequestId();
 }

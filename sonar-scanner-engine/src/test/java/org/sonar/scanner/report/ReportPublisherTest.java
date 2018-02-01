@@ -280,7 +280,7 @@ public class ReportPublisherTest {
     String pullRequestId = "pr-123";
     when(branchConfiguration.branchName()).thenReturn(branchName);
     when(branchConfiguration.branchType()).thenReturn(PULL_REQUEST);
-    when(branchConfiguration.pullRequestKey()).thenReturn(pullRequestId);
+    when(branchConfiguration.pullRequestId()).thenReturn(pullRequestId);
 
     WsResponse response = mock(WsResponse.class);
 
