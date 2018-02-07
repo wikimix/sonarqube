@@ -29,6 +29,8 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.text.StrSubstitutor;
 import org.sonar.api.measures.Metric;
 import org.sonar.api.server.ServerSide;
+import org.sonar.api.utils.log.Logger;
+import org.sonar.api.utils.log.Loggers;
 
 import static java.lang.String.valueOf;
 import static java.nio.charset.StandardCharsets.UTF_8;
@@ -39,8 +41,10 @@ import static org.sonar.api.measures.Metric.Level.WARN;
 @ServerSide
 public class SvgGenerator {
 
+  private static final Logger LOGGER = Loggers.get(SvgGenerator.class);
+
   private static final FontRenderContext FONT_RENDER_CONTEXT = new FontRenderContext(new AffineTransform(), true, true);
-  private static final Font FONT = new Font("Verdana", Font.PLAIN, 11);
+  private static final Font FONT = new Font("courrier", Font.PLAIN, 11);
 
   private static final int MARGIN = 6;
   private static final int ICON_WIDTH = 20;
@@ -59,6 +63,7 @@ public class SvgGenerator {
   private final Map<Metric.Level, String> qualityGateTemplates;
 
   public SvgGenerator() {
+    LOGGER.debug("Project badges will be using font '{}' in order to compute SVG badges width.", FONT.getName());
     this.errorTemplate = readTemplate("error.svg");
     this.badgeTemplate = readTemplate("badge.svg");
     this.qualityGateTemplates = ImmutableMap.of(
