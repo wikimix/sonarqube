@@ -132,7 +132,7 @@ public class PersistFileSourcesStepTest extends BaseStepTest {
 
     assertThat(dbTester.countRowsOfTable("file_sources")).isEqualTo(1);
     FileSourceDto fileSourceDto = dbClient.fileSourceDao().selectSourceByFileUuid(session, FILE1_UUID);
-    assertThat(fileSourceDto.getLineHashes()).isEqualTo("137f72c3708c6bd0de00a0e5a69c699b\ne6251bcf1a7dc3ba5e7933e325bbe605");
+    assertThat(fileSourceDto.getLineHashes()).containsExactly("137f72c3708c6bd0de00a0e5a69c699b", "e6251bcf1a7dc3ba5e7933e325bbe605");
     assertThat(fileSourceDto.getSrcHash()).isEqualTo("ee5a58024a155466b43bc559d953e018");
   }
 
