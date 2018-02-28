@@ -17,51 +17,38 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
-// @flow
-import React from 'react';
+import * as React from 'react';
 import { orderBy, without } from 'lodash';
 import FacetBox from '../../../components/facet/FacetBox';
 import FacetHeader from '../../../components/facet/FacetHeader';
 import FacetItem from '../../../components/facet/FacetItem';
 import FacetItemsList from '../../../components/facet/FacetItemsList';
+import SeverityHelper from '../../../components/shared/SeverityHelper';
 import { translate } from '../../../helpers/l10n';
-import { formatFacetStat } from '../utils';
+import { formatFacetStat, Query } from '../utils';
 
-/*::
-type Props = {|
-  facetMode: string,
-  onChange: (changes: {}) => void,
-  onToggle: (property: string) => void,
-  open: boolean,
-  resolved: boolean,
-  resolutions: Array<string>,
-  stats?: { [string]: number }
-|};
-*/
+interface Props {
+  facetMode: string;
+  onChange: (changes: Partial<Query>) => void;
+  onToggle: (property: string) => void;
+  open: boolean;
+  severities: Array<string>;
+  stats: { [x: string]: number } | undefined;
+}
 
-export default class ResolutionFacet extends React.PureComponent {
-  /*:: props: Props; */
-
-  property = 'resolutions';
+export default class SeverityFacet extends React.PureComponent<Props> {
+  property = 'severities';
 
   static defaultProps = {
     open: true
   };
 
-  handleItemClick = (itemValue /*: string */) => {
-    if (itemValue === '') {
-      // unresolved
-      this.props.onChange({ resolved: !this.props.resolved, resolutions: [] });
-    } else {
-      // defined resolution
-      const { resolutions } = this.props;
-      const newValue = orderBy(
-        resolutions.includes(itemValue)
-          ? without(resolutions, itemValue)
-          : [...resolutions, itemValue]
-      );
-      this.props.onChange({ resolved: true, resolutions: newValue });
-    }
+  handleItemClick = (itemValue: string) => {
+    const { severities } = this.props;
+    const newValue = orderBy(
+      severities.includes(itemValue) ? without(severities, itemValue) : [...severities, itemValue]
+    );
+    this.props.onChange({ [this.property]: newValue });
   };
 
   handleHeaderClick = () => {
@@ -69,43 +56,35 @@ export default class ResolutionFacet extends React.PureComponent {
   };
 
   handleClear = () => {
-    this.props.onChange({ resolved: false, resolutions: [] });
+    this.props.onChange({ [this.property]: [] });
   };
 
-  isFacetItemActive(resolution /*: string */) {
-    return resolution === '' ? !this.props.resolved : this.props.resolutions.includes(resolution);
-  }
-
-  getFacetItemName(resolution /*: string */) {
-    return resolution === '' ? translate('unresolved') : translate('issue.resolution', resolution);
-  }
-
-  getStat(resolution /*: string */) /*: ?number */ {
+  getStat(severity: string) {
     const { stats } = this.props;
-    return stats ? stats[resolution] : null;
+    return stats ? stats[severity] : undefined;
   }
 
-  renderItem = (resolution /*: string */) => {
-    const active = this.isFacetItemActive(resolution);
-    const stat = this.getStat(resolution);
+  renderItem = (severity: string) => {
+    const active = this.props.severities.includes(severity);
+    const stat = this.getStat(severity);
 
     return (
       <FacetItem
         active={active}
         disabled={stat === 0 && !active}
-        key={resolution}
         halfWidth={true}
-        name={this.getFacetItemName(resolution)}
+        key={severity}
+        name={<SeverityHelper severity={severity} />}
         onClick={this.handleItemClick}
         stat={formatFacetStat(stat, this.props.facetMode)}
-        value={resolution}
+        value={severity}
       />
     );
   };
 
   render() {
-    const resolutions = ['', 'FIXED', 'FALSE-POSITIVE', 'WONTFIX', 'REMOVED'];
-    const values = this.props.resolutions.map(resolution => this.getFacetItemName(resolution));
+    const severities = ['BLOCKER', 'MINOR', 'CRITICAL', 'INFO', 'MAJOR'];
+    const values = this.props.severities.map(severity => translate('severity', severity));
 
     return (
       <FacetBox property={this.property}>
@@ -117,7 +96,7 @@ export default class ResolutionFacet extends React.PureComponent {
           values={values}
         />
 
-        {this.props.open && <FacetItemsList>{resolutions.map(this.renderItem)}</FacetItemsList>}
+        {this.props.open && <FacetItemsList>{severities.map(this.renderItem)}</FacetItemsList>}
       </FacetBox>
     );
   }

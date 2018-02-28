@@ -17,38 +17,34 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
-// @flow
-import React from 'react';
+import * as React from 'react';
 import LocationIndex from '../../../components/common/LocationIndex';
 import LocationMessage from '../../../components/common/LocationMessage';
 
-/*::
-type Props = {
-  index: number,
-  message: string,
-  onClick: number => void,
-  scroll: HTMLElement => void,
-  selected: boolean
-};
-*/
+interface Props {
+  index: number;
+  message: string;
+  onClick: (index: number) => void;
+  scroll: (element: Element) => void;
+  selected: boolean;
+}
 
-export default class ConciseIssueLocationsNavigatorLocation extends React.PureComponent {
-  /*:: node: HTMLElement; */
-  /*:: props: Props; */
+export default class ConciseIssueLocationsNavigatorLocation extends React.PureComponent<Props> {
+  node?: HTMLElement | null;
 
   componentDidMount() {
-    if (this.props.selected) {
+    if (this.props.selected && this.node) {
       this.props.scroll(this.node);
     }
   }
 
-  componentDidUpdate(prevProps /*: Props */) {
-    if (this.props.selected && prevProps.selected !== this.props.selected) {
+  componentDidUpdate(prevProps: Props) {
+    if (this.props.selected && prevProps.selected !== this.props.selected && this.node) {
       this.props.scroll(this.node);
     }
   }
 
-  handleClick = (event /*: Event */) => {
+  handleClick = (event: React.MouseEvent<HTMLAnchorElement>) => {
     event.preventDefault();
     this.props.onClick(this.props.index);
   };

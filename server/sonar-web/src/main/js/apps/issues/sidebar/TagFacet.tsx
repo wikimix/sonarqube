@@ -17,46 +17,40 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
-// @flow
-import React from 'react';
-import { sortBy, without } from 'lodash';
+import * as React from 'react';
+import { sortBy, uniq, without } from 'lodash';
 import FacetBox from '../../../components/facet/FacetBox';
 import FacetHeader from '../../../components/facet/FacetHeader';
 import FacetItem from '../../../components/facet/FacetItem';
 import FacetItemsList from '../../../components/facet/FacetItemsList';
-import QualifierIcon from '../../../components/shared/QualifierIcon';
+import FacetFooter from '../../../components/facet/FacetFooter';
+import { searchIssueTags } from '../../../api/issues';
 import { translate } from '../../../helpers/l10n';
-import { collapsePath } from '../../../helpers/path';
-import { formatFacetStat } from '../utils';
-/*:: import type { ReferencedComponent } from '../utils'; */
+import { formatFacetStat, Query } from '../utils';
+import { Component } from '../../../app/types';
 
-/*::
-type Props = {|
-  facetMode: string,
-  onChange: (changes: { [string]: Array<string> }) => void,
-  onToggle: (property: string) => void,
-  open: boolean,
-  stats?: { [string]: number },
-  referencedComponents: { [string]: ReferencedComponent },
-  directories: Array<string>
-|};
-*/
+interface Props {
+  component: Component | undefined;
+  facetMode: string;
+  onChange: (changes: Partial<Query>) => void;
+  onToggle: (property: string) => void;
+  open: boolean;
+  organization: { key: string } | undefined;
+  stats: { [x: string]: number } | undefined;
+  tags: string[];
+}
 
-export default class DirectoryFacet extends React.PureComponent {
-  /*:: props: Props; */
-
-  property = 'directories';
+export default class TagFacet extends React.PureComponent<Props> {
+  property = 'tags';
 
   static defaultProps = {
     open: true
   };
 
-  handleItemClick = (itemValue /*: string */) => {
-    const { directories } = this.props;
+  handleItemClick = (itemValue: string) => {
+    const { tags } = this.props;
     const newValue = sortBy(
-      directories.includes(itemValue)
-        ? without(directories, itemValue)
-        : [...directories, itemValue]
+      tags.includes(itemValue) ? without(tags, itemValue) : [...tags, itemValue]
     );
     this.props.onChange({ [this.property]: newValue });
   };
@@ -69,16 +63,31 @@ export default class DirectoryFacet extends React.PureComponent {
     this.props.onChange({ [this.property]: [] });
   };
 
-  getStat(directory /*: string */) /*: ?number */ {
+  handleSearch = (query: string) => {
+    let organization = this.props.component && this.props.component.organization;
+    if (this.props.organization && !organization) {
+      organization = this.props.organization.key;
+    }
+    return searchIssueTags({ organization, ps: 50, q: query }).then(tags =>
+      tags.map(tag => ({ label: tag, value: tag }))
+    );
+  };
+
+  handleSelect = (option: { value: string }) => {
+    const { tags } = this.props;
+    this.props.onChange({ [this.property]: uniq([...tags, option.value]) });
+  };
+
+  getStat(tag: string) {
     const { stats } = this.props;
-    return stats ? stats[directory] : null;
+    return stats ? stats[tag] : undefined;
   }
 
-  renderName(directory /*: string */) /*: React.Element<*> | string */ {
+  renderTag(tag: string) {
     return (
       <span>
-        <QualifierIcon className="little-spacer-right" qualifier="DIR" />
-        {directory}
+        <i className="icon-tags icon-gray little-spacer-right" />
+        {tag}
       </span>
     );
   }
@@ -90,26 +99,33 @@ export default class DirectoryFacet extends React.PureComponent {
       return null;
     }
 
-    const directories = sortBy(Object.keys(stats), key => -stats[key]);
+    const tags = sortBy(Object.keys(stats), key => -stats[key]);
 
     return (
       <FacetItemsList>
-        {directories.map(directory => (
+        {tags.map(tag => (
           <FacetItem
-            active={this.props.directories.includes(directory)}
-            key={directory}
-            name={this.renderName(directory)}
+            active={this.props.tags.includes(tag)}
+            key={tag}
+            name={this.renderTag(tag)}
             onClick={this.handleItemClick}
-            stat={formatFacetStat(this.getStat(directory), this.props.facetMode)}
-            value={directory}
+            stat={formatFacetStat(this.getStat(tag), this.props.facetMode)}
+            value={tag}
           />
         ))}
       </FacetItemsList>
     );
   }
 
+  renderFooter() {
+    if (!this.props.stats) {
+      return null;
+    }
+
+    return <FacetFooter onSearch={this.handleSearch} onSelect={this.handleSelect} />;
+  }
+
   render() {
-    const values = this.props.directories.map(dir => collapsePath(dir));
     return (
       <FacetBox property={this.property}>
         <FacetHeader
@@ -117,10 +133,12 @@ export default class DirectoryFacet extends React.PureComponent {
           onClear={this.handleClear}
           onClick={this.handleHeaderClick}
           open={this.props.open}
-          values={values}
+          values={this.props.tags}
         />
 
         {this.props.open && this.renderList()}
+
+        {this.props.open && this.renderFooter()}
       </FacetBox>
     );
   }

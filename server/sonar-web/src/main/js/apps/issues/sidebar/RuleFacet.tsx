@@ -17,45 +17,40 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
-// @flow
-import React from 'react';
+import * as React from 'react';
 import { sortBy, uniq, without } from 'lodash';
 import FacetBox from '../../../components/facet/FacetBox';
 import FacetHeader from '../../../components/facet/FacetHeader';
 import FacetItem from '../../../components/facet/FacetItem';
 import FacetItemsList from '../../../components/facet/FacetItemsList';
 import FacetFooter from '../../../components/facet/FacetFooter';
-import { searchIssueTags } from '../../../api/issues';
+import { searchRules } from '../../../api/rules';
 import { translate } from '../../../helpers/l10n';
-/*:: import type { Component } from '../utils'; */
-import { formatFacetStat } from '../utils';
+import { formatFacetStat, Query } from '../utils';
 
-/*::
-type Props = {|
-  component?: Component,
-  facetMode: string,
-  onChange: (changes: { [string]: Array<string> }) => void,
-  onToggle: (property: string) => void,
-  open: boolean,
-  organization?: { key: string },
-  stats?: { [string]: number },
-  tags: Array<string>
-|};
-*/
+interface Props {
+  facetMode: string;
+  languages: string[];
+  onChange: (changes: Partial<Query>) => void;
+  onToggle: (property: string) => void;
+  open: boolean;
+  organization: string | undefined;
+  referencedRules: { [ruleKey: string]: { name: string } };
+  rules: string[];
+  stats: { [x: string]: number } | undefined;
+}
 
-export default class TagFacet extends React.PureComponent {
-  /*:: props: Props; */
-
-  property = 'tags';
+export default class RuleFacet extends React.PureComponent<Props> {
+  property = 'rules';
 
   static defaultProps = {
     open: true
   };
 
-  handleItemClick = (itemValue /*: string */) => {
-    const { tags } = this.props;
+  handleItemClick = (itemValue: string) => {
+    const { rules } = this.props;
     const newValue = sortBy(
-      tags.includes(itemValue) ? without(tags, itemValue) : [...tags, itemValue]
+      rules.includes(itemValue) ? without(rules, itemValue) : [...rules, itemValue]
     );
     this.props.onChange({ [this.property]: newValue });
   };
@@ -68,33 +63,31 @@ export default class TagFacet extends React.PureComponent {
     this.props.onChange({ [this.property]: [] });
   };
 
-  handleSearch = (query /*: string */) => {
-    let organization = this.props.component && this.props.component.organization;
-    if (this.props.organization && !organization) {
-      organization = this.props.organization.key;
-    }
-    return searchIssueTags({ organization, ps: 50, q: query }).then(tags =>
-      tags.map(tag => ({ label: tag, value: tag }))
+  handleSearch = (query: string) => {
+    const { languages, organization } = this.props;
+    return searchRules({
+      f: 'name,langName',
+      languages: languages.length ? languages.join() : undefined,
+      organization,
+      q: query
+    }).then(response =>
+      response.rules.map(rule => ({ label: `(${rule.langName}) ${rule.name}`, value: rule.key }))
     );
   };
 
-  handleSelect = (option /*: { value: string } */) => {
-    const { tags } = this.props;
-    this.props.onChange({ [this.property]: uniq([...tags, option.value]) });
+  handleSelect = (option: { value: string }) => {
+    const { rules } = this.props;
+    this.props.onChange({ [this.property]: uniq([...rules, option.value]) });
   };
 
-  getStat(tag /*: string */) /*: ?number */ {
-    const { stats } = this.props;
-    return stats ? stats[tag] : null;
+  getRuleName(rule: string): string {
+    const { referencedRules } = this.props;
+    return referencedRules[rule] ? referencedRules[rule].name : rule;
   }
 
-  renderTag(tag /*: string */) {
-    return (
-      <span>
-        <i className="icon-tags icon-gray little-spacer-right" />
-        {tag}
-      </span>
-    );
+  getStat(rule: string) {
+    const { stats } = this.props;
+    return stats ? stats[rule] : undefined;
   }
 
   renderList() {
@@ -104,18 +97,18 @@ export default class TagFacet extends React.PureComponent {
       return null;
     }
 
-    const tags = sortBy(Object.keys(stats), key => -stats[key]);
+    const rules = sortBy(Object.keys(stats), key => -stats[key]);
 
     return (
       <FacetItemsList>
-        {tags.map(tag => (
+        {rules.map(rule => (
           <FacetItem
-            active={this.props.tags.includes(tag)}
-            key={tag}
-            name={this.renderTag(tag)}
+            active={this.props.rules.includes(rule)}
+            key={rule}
+            name={this.getRuleName(rule)}
             onClick={this.handleItemClick}
-            stat={formatFacetStat(this.getStat(tag), this.props.facetMode)}
-            value={tag}
+            stat={formatFacetStat(this.getStat(rule), this.props.facetMode)}
+            value={rule}
           />
         ))}
       </FacetItemsList>
@@ -131,18 +124,18 @@ export default class TagFacet extends React.PureComponent {
   }
 
   render() {
+    const values = this.props.rules.map(rule => this.getRuleName(rule));
     return (
-      <FacetBox>
+      <FacetBox property={this.property}>
         <FacetHeader
           name={translate('issues.facet', this.property)}
           onClear={this.handleClear}
           onClick={this.handleHeaderClick}
           open={this.props.open}
-          values={this.props.tags}
+          values={values}
         />
 
         {this.props.open && this.renderList()}
-
         {this.props.open && this.renderFooter()}
       </FacetBox>
     );

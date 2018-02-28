@@ -17,32 +17,26 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
-// @flow
-import React from 'react';
+import * as React from 'react';
 import ConciseIssueLocationBadge from './ConciseIssueLocationBadge';
-/*:: import type { Issue } from '../../../components/issue/types'; */
+import { Issue } from '../../../app/types';
 
-/*::
-type Props = {|
-  issue: Issue,
-  onFlowSelect: number => void,
-  selectedFlowIndex: ?number
-|};
-*/
+interface Props {
+  issue: Issue;
+  onFlowSelect: (index: number) => void;
+  selectedFlowIndex: number | undefined;
+}
 
-/*::
-type State = {
-  collapsed: boolean
-};
-*/
+interface State {
+  collapsed: boolean;
+}
 
 const LIMIT = 3;
 
-export default class ConciseIssueLocations extends React.PureComponent {
-  /*:: props: Props; */
-  state /*: State */ = { collapsed: true };
+export default class ConciseIssueLocations extends React.PureComponent<Props, State> {
+  state: State = { collapsed: true };
 
-  handleExpandClick = (event /*: Event */) => {
+  handleExpandClick = (event: React.MouseEvent<HTMLAnchorElement>) => {
     event.preventDefault();
     this.setState({ collapsed: false });
   };
@@ -58,13 +52,13 @@ export default class ConciseIssueLocations extends React.PureComponent {
   render() {
     const { secondaryLocations, flows } = this.props.issue;
 
-    const badges = [];
+    const badges: JSX.Element[] = [];
 
     if (secondaryLocations.length > 0) {
       badges.push(
         <ConciseIssueLocationBadge
-          key="-1"
           count={secondaryLocations.length}
+          key="-1"
           selected={this.props.selectedFlowIndex == null}
         />
       );
@@ -73,8 +67,8 @@ export default class ConciseIssueLocations extends React.PureComponent {
     flows.forEach((flow, index) => {
       badges.push(
         <ConciseIssueLocationBadge
-          key={index}
           count={flow.length}
+          key={index}
           onClick={() => this.props.onFlowSelect(index)}
           selected={index === this.props.selectedFlowIndex}
         />

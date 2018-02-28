@@ -17,23 +17,18 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
-// @flow
-import React from 'react';
+import * as React from 'react';
 import { translate } from '../../../helpers/l10n';
 
-/*::
-type Props = {|
-  myIssues: boolean,
-  onMyIssuesChange: boolean => void
-|};
-*/
+interface Props {
+  myIssues: boolean;
+  onMyIssuesChange: (myIssues: boolean) => void;
+}
 
-export default class MyIssuesFilter extends React.PureComponent {
-  /*:: props: Props; */
-
-  handleClick = (myIssues /*: boolean */) => (e /*: Event & { currentTarget: HTMLElement } */) => {
-    e.preventDefault();
-    e.currentTarget.blur();
+export default class MyIssuesFilter extends React.PureComponent<Props> {
+  handleClick = (myIssues: boolean) => (event: React.MouseEvent<HTMLButtonElement>) => {
+    event.preventDefault();
+    event.currentTarget.blur();
     this.props.onMyIssuesChange(myIssues);
   };
 

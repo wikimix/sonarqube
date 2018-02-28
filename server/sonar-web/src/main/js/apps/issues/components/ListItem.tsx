@@ -17,42 +17,35 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
-// @flow
-import React from 'react';
+import * as React from 'react';
 import ComponentBreadcrumbs from './ComponentBreadcrumbs';
+import { Issue as IssueType, Component } from '../../../app/types';
 import Issue from '../../../components/issue/Issue';
-/*:: import type { Issue as IssueType } from '../../../components/issue/types'; */
-/*:: import type { Component } from '../utils'; */
 
-/*::
-type Props = {|
-  branch?: string,
-  checked: boolean,
-  component?: Component,
-  issue: IssueType,
-  onChange: IssueType => void,
-  onCheck?: string => void,
-  onClick: string => void,
-  onFilterChange: (changes: {}) => void,
-  onPopupToggle: (issue: string, popupName: string, open: ?boolean ) => void,
-  openPopup: ?string,
-  organization?: { key: string },
-  previousIssue: ?Object,
-  selected: boolean
-|};
-*/
+interface Props {
+  branch?: string;
+  checked: boolean;
+  component: Component | undefined;
+  issue: IssueType;
+  onChange: (issue: IssueType) => void;
+  onCheck: ((issueKey: string) => void) | undefined;
+  onClick: (issueKey: string) => void;
+  onFilterChange: (changes: {}) => void;
+  onPopupToggle: (issue: string, popupName: string, open?: boolean) => void;
+  openPopup: string | undefined;
+  organization: { key: string } | undefined;
+  previousIssue: IssueType | undefined;
+  selected: boolean;
+}
 
-/*::
-type State = {
-  similarIssues: boolean
-};
-*/
+interface State {
+  similarIssues: boolean;
+}
 
-export default class ListItem extends React.PureComponent {
-  /*:: props: Props; */
-  state /*: State */ = { similarIssues: false };
+export default class ListItem extends React.PureComponent<Props, State> {
+  state: State = { similarIssues: false };
 
-  handleFilter = (property /*: string */, issue /*: IssueType */) => {
+  handleFilter = (property: string, issue: IssueType) => {
     const { onFilterChange } = this.props;
 
     const issuesReset = { issues: [] };

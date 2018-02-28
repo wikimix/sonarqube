@@ -17,28 +17,23 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
-// @flow
-import React from 'react';
+import * as React from 'react';
 import ConciseIssue from './ConciseIssue';
+import { Issue } from '../../../app/types';
 import { scrollToElement } from '../../../helpers/scrolling';
-/*:: import type { Issue } from '../../../components/issue/types'; */
 
-/*::
-type Props = {|
-  issues: Array<Issue>,
-  onFlowSelect: number => void,
-  onIssueSelect: string => void,
-  onLocationSelect: number => void,
-  selected?: string,
-  selectedFlowIndex: ?number,
-  selectedLocationIndex: ?number
-|};
-*/
+interface Props {
+  issues: Issue[];
+  onFlowSelect: (index: number) => void;
+  onIssueSelect: (issueKey: string) => void;
+  onLocationSelect: (index: number) => void;
+  selected: string | undefined;
+  selectedFlowIndex: number | undefined;
+  selectedLocationIndex: number | undefined;
+}
 
-export default class ConciseIssuesList extends React.PureComponent {
-  /*:: props: Props; */
-
-  handleScroll = (element /*: HTMLElement */, bottomOffset /*: number */ = 100) => {
+export default class ConciseIssuesList extends React.PureComponent<Props> {
+  handleScroll = (element: Element, bottomOffset = 100) => {
     const scrollableElement = document.querySelector('.layout-page-side');
     if (element && scrollableElement) {
       scrollToElement(element, { topOffset: 150, bottomOffset, parent: scrollableElement });
@@ -50,12 +45,12 @@ export default class ConciseIssuesList extends React.PureComponent {
       <div>
         {this.props.issues.map((issue, index) => (
           <ConciseIssue
-            key={issue.key}
             issue={issue}
+            key={issue.key}
             onFlowSelect={this.props.onFlowSelect}
             onLocationSelect={this.props.onLocationSelect}
             onSelect={this.props.onIssueSelect}
-            previousIssue={index > 0 ? this.props.issues[index - 1] : null}
+            previousIssue={index > 0 ? this.props.issues[index - 1] : undefined}
             scroll={this.handleScroll}
             selected={issue.key === this.props.selected}
             selectedFlowIndex={this.props.selectedFlowIndex}

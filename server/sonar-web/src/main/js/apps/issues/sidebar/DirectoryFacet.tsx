@@ -17,8 +17,7 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
-// @flow
-import React from 'react';
+import * as React from 'react';
 import { sortBy, without } from 'lodash';
 import FacetBox from '../../../components/facet/FacetBox';
 import FacetHeader from '../../../components/facet/FacetHeader';
@@ -27,34 +26,31 @@ import FacetItemsList from '../../../components/facet/FacetItemsList';
 import QualifierIcon from '../../../components/shared/QualifierIcon';
 import { translate } from '../../../helpers/l10n';
 import { collapsePath } from '../../../helpers/path';
-import { formatFacetStat } from '../utils';
-/*:: import type { ReferencedComponent } from '../utils'; */
+import { formatFacetStat, Query, ReferencedComponent } from '../utils';
 
-/*::
-type Props = {|
-  facetMode: string,
-  onChange: (changes: { [string]: Array<string> }) => void,
-  onToggle: (property: string) => void,
-  open: boolean,
-  stats?: { [string]: number },
-  referencedComponents: { [string]: ReferencedComponent },
-  files: Array<string>
-|};
-*/
+interface Props {
+  directories: string[];
+  facetMode: string;
+  onChange: (changes: Partial<Query>) => void;
+  onToggle: (property: string) => void;
+  open: boolean;
+  referencedComponents: { [componentKey: string]: ReferencedComponent };
+  stats: { [x: string]: number } | undefined;
+}
 
-export default class FileFacet extends React.PureComponent {
-  /*:: props: Props; */
-
-  property = 'files';
+export default class DirectoryFacet extends React.PureComponent<Props> {
+  property = 'directories';
 
   static defaultProps = {
     open: true
   };
 
-  handleItemClick = (itemValue /*: string */) => {
-    const { files } = this.props;
+  handleItemClick = (itemValue: string) => {
+    const { directories } = this.props;
     const newValue = sortBy(
-      files.includes(itemValue) ? without(files, itemValue) : [...files, itemValue]
+      directories.includes(itemValue)
+        ? without(directories, itemValue)
+        : [...directories, itemValue]
     );
     this.props.onChange({ [this.property]: newValue });
   };
@@ -67,22 +63,16 @@ export default class FileFacet extends React.PureComponent {
     this.props.onChange({ [this.property]: [] });
   };
 
-  getStat(file /*: string */) /*: ?number */ {
+  getStat(directory: string) {
     const { stats } = this.props;
-    return stats ? stats[file] : null;
+    return stats ? stats[directory] : undefined;
   }
 
-  getFileName(file /*: string */) {
-    const { referencedComponents } = this.props;
-    return referencedComponents[file] ? collapsePath(referencedComponents[file].path, 15) : file;
-  }
-
-  renderName(file /*: string */) /*: React.Element<*> | string */ {
-    const name = this.getFileName(file);
+  renderName(directory: string) {
     return (
       <span>
-        <QualifierIcon className="little-spacer-right" qualifier="FIL" />
-        {name}
+        <QualifierIcon className="little-spacer-right" qualifier="DIR" />
+        {directory}
       </span>
     );
   }
@@ -94,18 +84,18 @@ export default class FileFacet extends React.PureComponent {
       return null;
     }
 
-    const files = sortBy(Object.keys(stats), key => -stats[key]);
+    const directories = sortBy(Object.keys(stats), key => -stats[key]);
 
     return (
       <FacetItemsList>
-        {files.map(file => (
+        {directories.map(directory => (
           <FacetItem
-            active={this.props.files.includes(file)}
-            key={file}
-            name={this.renderName(file)}
+            active={this.props.directories.includes(directory)}
+            key={directory}
+            name={this.renderName(directory)}
             onClick={this.handleItemClick}
-            stat={formatFacetStat(this.getStat(file), this.props.facetMode)}
-            value={file}
+            stat={formatFacetStat(this.getStat(directory), this.props.facetMode)}
+            value={directory}
           />
         ))}
       </FacetItemsList>
@@ -113,7 +103,7 @@ export default class FileFacet extends React.PureComponent {
   }
 
   render() {
-    const values = this.props.files.map(file => this.getFileName(file));
+    const values = this.props.directories.map(dir => collapsePath(dir));
     return (
       <FacetBox property={this.property}>
         <FacetHeader

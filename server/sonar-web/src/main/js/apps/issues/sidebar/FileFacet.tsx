@@ -17,8 +17,7 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
-// @flow
-import React from 'react';
+import * as React from 'react';
 import { sortBy, without } from 'lodash';
 import FacetBox from '../../../components/facet/FacetBox';
 import FacetHeader from '../../../components/facet/FacetHeader';
@@ -26,34 +25,30 @@ import FacetItem from '../../../components/facet/FacetItem';
 import FacetItemsList from '../../../components/facet/FacetItemsList';
 import QualifierIcon from '../../../components/shared/QualifierIcon';
 import { translate } from '../../../helpers/l10n';
-import { formatFacetStat } from '../utils';
-/*:: import type { ReferencedComponent } from '../utils'; */
+import { collapsePath } from '../../../helpers/path';
+import { formatFacetStat, Query, ReferencedComponent } from '../utils';
 
-/*::
-type Props = {|
-  facetMode: string,
-  onChange: (changes: { [string]: Array<string> }) => void,
-  onToggle: (property: string) => void,
-  open: boolean,
-  stats?: { [string]: number },
-  referencedComponents: { [string]: ReferencedComponent },
-  modules: Array<string>
-|};
-*/
+interface Props {
+  facetMode: string;
+  files: string[];
+  onChange: (changes: Partial<Query>) => void;
+  onToggle: (property: string) => void;
+  open: boolean;
+  referencedComponents: { [componentKey: string]: ReferencedComponent };
+  stats: { [x: string]: number } | undefined;
+}
 
-export default class ModuleFacet extends React.PureComponent {
-  /*:: props: Props; */
-
-  property = 'modules';
+export default class FileFacet extends React.PureComponent<Props> {
+  property = 'files';
 
   static defaultProps = {
     open: true
   };
 
-  handleItemClick = (itemValue /*: string */) => {
-    const { modules } = this.props;
+  handleItemClick = (itemValue: string) => {
+    const { files } = this.props;
     const newValue = sortBy(
-      modules.includes(itemValue) ? without(modules, itemValue) : [...modules, itemValue]
+      files.includes(itemValue) ? without(files, itemValue) : [...files, itemValue]
     );
     this.props.onChange({ [this.property]: newValue });
   };
@@ -66,21 +61,22 @@ export default class ModuleFacet extends React.PureComponent {
     this.props.onChange({ [this.property]: [] });
   };
 
-  getStat(module /*: string */) /*: ?number */ {
+  getStat(file: string) {
     const { stats } = this.props;
-    return stats ? stats[module] : null;
+    return stats ? stats[file] : undefined;
   }
 
-  getModuleName(module /*: string */) {
+  getFileName(file: string) {
     const { referencedComponents } = this.props;
-    return referencedComponents[module] ? referencedComponents[module].name : module;
+    return referencedComponents[file] ? collapsePath(referencedComponents[file].path, 15) : file;
   }
 
-  renderName(module /*: string */) /*: React.Element<*> | string */ {
+  renderName(file: string) {
+    const name = this.getFileName(file);
     return (
       <span>
-        <QualifierIcon className="little-spacer-right" qualifier="BRC" />
-        {this.getModuleName(module)}
+        <QualifierIcon className="little-spacer-right" qualifier="FIL" />
+        {name}
       </span>
     );
   }
@@ -92,18 +88,18 @@ export default class ModuleFacet extends React.PureComponent {
       return null;
     }
 
-    const modules = sortBy(Object.keys(stats), key => -stats[key]);
+    const files = sortBy(Object.keys(stats), key => -stats[key]);
 
     return (
       <FacetItemsList>
-        {modules.map(module => (
+        {files.map(file => (
           <FacetItem
-            active={this.props.modules.includes(module)}
-            key={module}
-            name={this.renderName(module)}
+            active={this.props.files.includes(file)}
+            key={file}
+            name={this.renderName(file)}
             onClick={this.handleItemClick}
-            stat={formatFacetStat(this.getStat(module), this.props.facetMode)}
-            value={module}
+            stat={formatFacetStat(this.getStat(file), this.props.facetMode)}
+            value={file}
           />
         ))}
       </FacetItemsList>
@@ -111,7 +107,7 @@ export default class ModuleFacet extends React.PureComponent {
   }
 
   render() {
-    const values = this.props.modules.map(module => this.getModuleName(module));
+    const values = this.props.files.map(file => this.getFileName(file));
     return (
       <FacetBox property={this.property}>
         <FacetHeader

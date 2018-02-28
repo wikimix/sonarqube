@@ -17,8 +17,7 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
-// @flow
-import React from 'react';
+import * as React from 'react';
 import { max } from 'lodash';
 import { intlShape } from 'react-intl';
 import DateFromNow from '../../../components/intl/DateFromNow';
@@ -32,27 +31,24 @@ import DateInput from '../../../components/controls/DateInput';
 import { isSameDay, parseDate, toShortNotSoISOString } from '../../../helpers/dates';
 import { translate } from '../../../helpers/l10n';
 import { formatMeasure } from '../../../helpers/measures';
-/*:: import type { Component } from '../utils'; */
+import { Component } from '../../../app/types';
+import { Query } from '../utils';
 
-/*::
-type Props = {|
-  component?: Component,
-  createdAfter: string,
-  createdAt: string,
-  createdBefore: string,
-  createdInLast: string,
-  facetMode: string,
-  onChange: (changes: {}) => void,
-  onToggle: (property: string) => void,
-  open: boolean,
-  sinceLeakPeriod: boolean,
-  stats?: { [string]: number }
-|};
-*/
+interface Props {
+  component: Component | undefined;
+  createdAfter: string;
+  createdAt: string;
+  createdBefore: string;
+  createdInLast: string;
+  facetMode: string;
+  onChange: (changes: Partial<Query>) => void;
+  onToggle: (property: string) => void;
+  open: boolean;
+  sinceLeakPeriod: boolean;
+  stats: { [x: string]: number } | undefined;
+}
 
-export default class CreationDateFacet extends React.PureComponent {
-  /*:: props: Props; */
-
+export default class CreationDateFacet extends React.PureComponent<Props> {
   property = 'createdAt';
 
   static defaultProps = {
@@ -78,7 +74,7 @@ export default class CreationDateFacet extends React.PureComponent {
     this.resetTo({});
   };
 
-  resetTo = (changes /*: {} */) => {
+  resetTo = (changes: Partial<Query>) => {
     this.props.onChange({
       createdAfter: undefined,
       createdAt: undefined,
@@ -89,19 +85,20 @@ export default class CreationDateFacet extends React.PureComponent {
     });
   };
 
-  handleBarClick = (
-    { createdAfter, createdBefore } /*: {
-    createdAfter: Date,
-    createdBefore?: Date
-  } */
-  ) => {
+  handleBarClick = ({
+    createdAfter,
+    createdBefore
+  }: {
+    createdAfter: Date;
+    createdBefore?: Date;
+  }) => {
     this.resetTo({
       createdAfter: toShortNotSoISOString(createdAfter),
       createdBefore: createdBefore && toShortNotSoISOString(createdBefore)
     });
   };
 
-  handlePeriodChange = (property /*: string */, value /*: string */) => {
+  handlePeriodChange = (property: string, value: string) => {
     this.props.onChange({
       createdAt: undefined,
       createdInLast: undefined,
@@ -110,12 +107,11 @@ export default class CreationDateFacet extends React.PureComponent {
     });
   };
 
-  handlePeriodChangeBefore = (value /*: string */) =>
-    this.handlePeriodChange('createdBefore', value);
+  handlePeriodChangeBefore = (value: string) => this.handlePeriodChange('createdBefore', value);
 
-  handlePeriodChangeAfter = (value /*: string */) => this.handlePeriodChange('createdAfter', value);
+  handlePeriodChangeAfter = (value: string) => this.handlePeriodChange('createdAfter', value);
 
-  handlePeriodClick = (period /*: string */) => this.resetTo({ createdInLast: period });
+  handlePeriodClick = (period: string) => this.resetTo({ createdInLast: period });
 
   handleLeakPeriodClick = () => this.resetTo({ sinceLeakPeriod: true });
 
@@ -229,6 +225,7 @@ export default class CreationDateFacet extends React.PureComponent {
           className="search-navigator-date-facet-selection-dropdown-left"
           inputClassName="search-navigator-date-facet-selection-input"
           maxDate={createdBefore ? toShortNotSoISOString(createdBefore) : '+0'}
+          name="from"
           onChange={this.handlePeriodChangeAfter}
           placeholder={translate('from')}
           value={createdAfter ? toShortNotSoISOString(createdAfter) : undefined}
@@ -237,6 +234,7 @@ export default class CreationDateFacet extends React.PureComponent {
           className="search-navigator-date-facet-selection-dropdown-right"
           inputClassName="search-navigator-date-facet-selection-input"
           minDate={createdAfter ? toShortNotSoISOString(createdAfter) : undefined}
+          name="to"
           onChange={this.handlePeriodChangeBefore}
           placeholder={translate('to')}
           value={createdBefore ? toShortNotSoISOString(createdBefore) : undefined}

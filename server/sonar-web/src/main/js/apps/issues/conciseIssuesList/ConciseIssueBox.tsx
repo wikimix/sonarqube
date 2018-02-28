@@ -17,32 +17,28 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
-// @flow
-import React from 'react';
-import classNames from 'classnames';
+import * as React from 'react';
+import * as classNames from 'classnames';
 import ConciseIssueLocations from './ConciseIssueLocations';
 import ConciseIssueLocationsNavigator from './ConciseIssueLocationsNavigator';
 import SeverityHelper from '../../../components/shared/SeverityHelper';
 import TypeHelper from '../../../components/shared/TypeHelper';
-/*:: import type { Issue } from '../../../components/issue/types'; */
+import { Issue } from '../../../app/types';
 
-/*::
-type Props = {|
-  issue: Issue,
-  onClick: string => void,
-  onFlowSelect: number => void,
-  onLocationSelect: number => void,
-  scroll: (element: HTMLElement, bottomOffset: ?number) => void,
-  selected: boolean,
-  selectedFlowIndex: ?number,
-  selectedLocationIndex: ?number
-|};
-*/
+interface Props {
+  issue: Issue;
+  onClick: (issueKey: string) => void;
+  onFlowSelect: (index: number) => void;
+  onLocationSelect: (index: number) => void;
+  scroll: (element: Element, bottomOffset?: number) => void;
+  selected: boolean;
+  selectedFlowIndex: number | undefined;
+  selectedLocationIndex: number | undefined;
+}
 
-export default class ConciseIssueBox extends React.PureComponent {
-  /*:: messageElement: HTMLElement; */
-  /*:: rootElement: HTMLElement; */
-  /*:: props: Props; */
+export default class ConciseIssueBox extends React.PureComponent<Props> {
+  messageElement?: HTMLElement | null;
+  rootElement?: HTMLElement | null;
 
   componentDidMount() {
     if (this.props.selected) {
@@ -50,7 +46,7 @@ export default class ConciseIssueBox extends React.PureComponent {
     }
   }
 
-  componentDidUpdate(prevProps /*: Props */) {
+  componentDidUpdate(prevProps: Props) {
     if (this.props.selected && prevProps.selected !== this.props.selected) {
       this.handleScroll();
     }
@@ -68,14 +64,14 @@ export default class ConciseIssueBox extends React.PureComponent {
     if (locations == null || locations.length < 15) {
       // if there are no locations, or there are just few
       // then ensuse that the whole box is visible
-      this.props.scroll(this.rootElement);
-    } else {
+      if (this.rootElement) this.props.scroll(this.rootElement);
+    } else if (this.messageElement) {
       // otherwise scroll until the the message element is located on top
       this.props.scroll(this.messageElement, window.innerHeight - 250);
     }
   };
 
-  handleClick = (event /*: Event */) => {
+  handleClick = (event: React.MouseEvent<HTMLElement>) => {
     event.preventDefault();
     this.props.onClick(this.props.issue.key);
   };

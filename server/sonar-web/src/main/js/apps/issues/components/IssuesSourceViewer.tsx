@@ -17,32 +17,26 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
-// @flow
-import React from 'react';
+import * as React from 'react';
 import SourceViewer from '../../../components/SourceViewer/SourceViewer';
 import { scrollToElement } from '../../../helpers/scrolling';
-/*:: import type { Component, } from '../utils'; */
-/*:: import type { Issue } from '../../../components/issue/types'; */
+import { Issue } from '../../../app/types';
 
-/*::
-type Props = {|
-  branch?: string,
-  component: Component,
-  loadIssues: (string, number, number) => Promise<*>,
-  onIssueChange: Issue => void,
-  onIssueSelect: string => void,
-  onLocationSelect: number => void,
-  openIssue: Issue,
-  selectedFlowIndex: ?number,
-  selectedLocationIndex: ?number
-|};
-*/
+interface Props {
+  branch: string | undefined;
+  loadIssues: (component: string, from: number, to: number) => Promise<Issue[]>;
+  onIssueChange: (issue: Issue) => void;
+  onIssueSelect: (issueKey: string) => void;
+  onLocationSelect: (index: number) => void;
+  openIssue: Issue;
+  selectedFlowIndex: number | undefined;
+  selectedLocationIndex: number | undefined;
+}
 
-export default class IssuesSourceViewer extends React.PureComponent {
-  /*:: node: HTMLElement; */
-  /*:: props: Props; */
+export default class IssuesSourceViewer extends React.PureComponent<Props> {
+  node?: HTMLElement | null;
 
-  componentDidUpdate(prevProps /*: Props */) {
+  componentDidUpdate(prevProps: Props) {
     const { openIssue, selectedLocationIndex } = this.props;
 
     // Scroll back to the issue when the selected location is set to -1
@@ -56,14 +50,16 @@ export default class IssuesSourceViewer extends React.PureComponent {
     }
   }
 
-  scrollToIssue = (smooth /*: boolean */ = true) => {
-    const element = this.node.querySelector(`[data-issue="${this.props.openIssue.key}"]`);
-    if (element) {
-      this.handleScroll(element, smooth);
+  scrollToIssue = (smooth = true) => {
+    if (this.node) {
+      const element = this.node.querySelector(`[data-issue="${this.props.openIssue.key}"]`);
+      if (element) {
+        this.handleScroll(element, smooth);
+      }
     }
   };
 
-  handleScroll = (element /*: HTMLElement */, smooth /*: boolean */ = true) => {
+  handleScroll = (element: Element, smooth = true) => {
     const offset = window.innerHeight / 2;
     scrollToElement(element, { topOffset: offset - 100, bottomOffset: offset, smooth });
   };
@@ -113,13 +109,13 @@ export default class IssuesSourceViewer extends React.PureComponent {
           displayIssueLocationsCount={false}
           displayIssueLocationsLink={false}
           displayLocationMarkers={!allMessagesEmpty}
-          highlightedLocations={locations}
           highlightedLocationMessage={locationMessage}
+          highlightedLocations={locations}
           loadIssues={this.props.loadIssues}
-          onLoaded={this.handleLoaded}
-          onLocationSelect={this.props.onLocationSelect}
           onIssueChange={this.props.onIssueChange}
           onIssueSelect={this.props.onIssueSelect}
+          onLoaded={this.handleLoaded}
+          onLocationSelect={this.props.onLocationSelect}
           scroll={this.handleScroll}
           selectedIssue={openIssue.key}
         />

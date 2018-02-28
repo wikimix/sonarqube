@@ -17,41 +17,36 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
-// @flow
-import React from 'react';
+import * as React from 'react';
 import { orderBy, without } from 'lodash';
 import FacetBox from '../../../components/facet/FacetBox';
 import FacetHeader from '../../../components/facet/FacetHeader';
 import FacetItem from '../../../components/facet/FacetItem';
 import FacetItemsList from '../../../components/facet/FacetItemsList';
-import SeverityHelper from '../../../components/shared/SeverityHelper';
+import IssueTypeIcon from '../../../components/ui/IssueTypeIcon';
 import { translate } from '../../../helpers/l10n';
-import { formatFacetStat } from '../utils';
+import { formatFacetStat, Query } from '../utils';
 
-/*::
-type Props = {|
-  facetMode: string,
-  onChange: (changes: { [string]: Array<string> }) => void,
-  onToggle: (property: string) => void,
-  open: boolean,
-  severities: Array<string>,
-  stats?: { [string]: number }
-|};
-*/
+interface Props {
+  facetMode: string;
+  onChange: (changes: Partial<Query>) => void;
+  onToggle: (property: string) => void;
+  open: boolean;
+  stats: { [x: string]: number } | undefined;
+  types: Array<string>;
+}
 
-export default class SeverityFacet extends React.PureComponent {
-  /*:: props: Props; */
-
-  property = 'severities';
+export default class TypeFacet extends React.PureComponent<Props> {
+  property = 'types';
 
   static defaultProps = {
     open: true
   };
 
-  handleItemClick = (itemValue /*: string */) => {
-    const { severities } = this.props;
+  handleItemClick = (itemValue: string) => {
+    const { types } = this.props;
     const newValue = orderBy(
-      severities.includes(itemValue) ? without(severities, itemValue) : [...severities, itemValue]
+      types.includes(itemValue) ? without(types, itemValue) : [...types, itemValue]
     );
     this.props.onChange({ [this.property]: newValue });
   };
@@ -64,32 +59,35 @@ export default class SeverityFacet extends React.PureComponent {
     this.props.onChange({ [this.property]: [] });
   };
 
-  getStat(severity /*: string */) /*: ?number */ {
+  getStat(type: string) {
     const { stats } = this.props;
-    return stats ? stats[severity] : null;
+    return stats ? stats[type] : undefined;
   }
 
-  renderItem = (severity /*: string */) => {
-    const active = this.props.severities.includes(severity);
-    const stat = this.getStat(severity);
+  renderItem = (type: string) => {
+    const active = this.props.types.includes(type);
+    const stat = this.getStat(type);
 
     return (
       <FacetItem
         active={active}
         disabled={stat === 0 && !active}
-        halfWidth={true}
-        key={severity}
-        name={<SeverityHelper severity={severity} />}
+        key={type}
+        name={
+          <span>
+            <IssueTypeIcon query={type} /> {translate('issue.type', type)}
+          </span>
+        }
         onClick={this.handleItemClick}
         stat={formatFacetStat(stat, this.props.facetMode)}
-        value={severity}
+        value={type}
       />
     );
   };
 
   render() {
-    const severities = ['BLOCKER', 'MINOR', 'CRITICAL', 'INFO', 'MAJOR'];
-    const values = this.props.severities.map(severity => translate('severity', severity));
+    const types = ['BUG', 'VULNERABILITY', 'CODE_SMELL'];
+    const values = this.props.types.map(type => translate('issue.type', type));
 
     return (
       <FacetBox property={this.property}>
@@ -101,7 +99,7 @@ export default class SeverityFacet extends React.PureComponent {
           values={values}
         />
 
-        {this.props.open && <FacetItemsList>{severities.map(this.renderItem)}</FacetItemsList>}
+        {this.props.open && <FacetItemsList>{types.map(this.renderItem)}</FacetItemsList>}
       </FacetBox>
     );
   }

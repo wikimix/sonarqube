@@ -17,8 +17,7 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
-// @flow
-import React from 'react';
+import * as React from 'react';
 import { sortBy, uniq, without } from 'lodash';
 import FacetBox from '../../../components/facet/FacetBox';
 import FacetHeader from '../../../components/facet/FacetHeader';
@@ -29,33 +28,29 @@ import Organization from '../../../components/shared/Organization';
 import QualifierIcon from '../../../components/shared/QualifierIcon';
 import { searchProjects, getTree } from '../../../api/components';
 import { translate } from '../../../helpers/l10n';
-import { formatFacetStat } from '../utils';
-/*:: import type { ReferencedComponent, Component } from '../utils'; */
+import { formatFacetStat, Query, ReferencedComponent } from '../utils';
+import { Component } from '../../../app/types';
 
-/*::
-type Props = {|
-  component?: Component,
-  facetMode: string,
-  onChange: (changes: { [string]: Array<string> }) => void,
-  onToggle: (property: string) => void,
-  open: boolean,
-  organization?: { key: string },
-  stats?: { [string]: number },
-  referencedComponents: { [string]: ReferencedComponent },
-  projects: Array<string>
-|};
-*/
+interface Props {
+  component: Component | undefined;
+  facetMode: string;
+  onChange: (changes: Partial<Query>) => void;
+  onToggle: (property: string) => void;
+  open: boolean;
+  organization: { key: string } | undefined;
+  projects: string[];
+  referencedComponents: { [componentKey: string]: ReferencedComponent };
+  stats: { [x: string]: number } | undefined;
+}
 
-export default class ProjectFacet extends React.PureComponent {
-  /*:: props: Props; */
-
+export default class ProjectFacet extends React.PureComponent<Props> {
   property = 'projects';
 
   static defaultProps = {
     open: true
   };
 
-  handleItemClick = (itemValue /*: string */) => {
+  handleItemClick = (itemValue: string) => {
     const { projects } = this.props;
     const newValue = sortBy(
       projects.includes(itemValue) ? without(projects, itemValue) : [...projects, itemValue]
@@ -71,11 +66,11 @@ export default class ProjectFacet extends React.PureComponent {
     this.props.onChange({ [this.property]: [] });
   };
 
-  handleSearch = (query /*: string */) => {
+  handleSearch = (query: string) => {
     const { component, organization } = this.props;
     if (component != null && ['VW', 'SVW', 'APP'].includes(component.qualifier)) {
       return getTree(component.key, { ps: 50, q: query, qualifiers: 'TRK' }).then(response =>
-        response.components.map(component => ({
+        response.components.map((component: any) => ({
           label: component.name,
           organization: component.organization,
           value: component.refId
@@ -96,22 +91,22 @@ export default class ProjectFacet extends React.PureComponent {
     );
   };
 
-  handleSelect = (option /*: { value: string } */) => {
+  handleSelect = (option: { value: string }) => {
     const { projects } = this.props;
     this.props.onChange({ [this.property]: uniq([...projects, option.value]) });
   };
 
-  getStat(project /*: string */) /*: ?number */ {
+  getStat(project: string) {
     const { stats } = this.props;
-    return stats ? stats[project] : null;
+    return stats ? stats[project] : undefined;
   }
 
-  getProjectName(project /*: string */) {
+  getProjectName(project: string) {
     const { referencedComponents } = this.props;
     return referencedComponents[project] ? referencedComponents[project].name : project;
   }
 
-  renderName(project /*: string */) /*: React.Element<*> | string */ {
+  renderName(project: string) {
     const { organization, referencedComponents } = this.props;
     return referencedComponents[project] ? (
       <span>
@@ -129,7 +124,7 @@ export default class ProjectFacet extends React.PureComponent {
     );
   }
 
-  renderOption = (option /*: { label: string, organization: string } */) => {
+  renderOption = (option: { label: string; organization: string }) => {
     return (
       <span>
         <Organization link={false} organizationKey={option.organization} />

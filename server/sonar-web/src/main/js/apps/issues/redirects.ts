@@ -17,12 +17,12 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
-// @flow
 import { parseQuery, areMyIssuesSelected, serializeQuery } from './utils';
-/*:: import type { RawQuery } from '../../helpers/query'; */
+import { RawQuery } from '../../helpers/query';
+import { Location } from '../../helpers/urls';
 
-function parseHash(hash /*: string */) /*: RawQuery */ {
-  const query /*: RawQuery */ = {};
+function parseHash(hash: string) {
+  const query: RawQuery = {};
   const parts = hash.split('|');
   parts.forEach(part => {
     const tokens = part.split('=');
@@ -39,7 +39,7 @@ function parseHash(hash /*: string */) /*: RawQuery */ {
   return query;
 }
 
-export function onEnter(state /*: Object */, replace /*: Function */) {
+export function onEnter(state: any, replace: (location: Location) => void) {
   const { hash } = window.location;
   if (hash.length > 1) {
     const query = parseHash(hash.substr(1));

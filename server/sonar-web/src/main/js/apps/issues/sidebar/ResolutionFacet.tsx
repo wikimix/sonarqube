@@ -17,42 +17,46 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
-// @flow
-import React from 'react';
+import * as React from 'react';
 import { orderBy, without } from 'lodash';
 import FacetBox from '../../../components/facet/FacetBox';
 import FacetHeader from '../../../components/facet/FacetHeader';
 import FacetItem from '../../../components/facet/FacetItem';
 import FacetItemsList from '../../../components/facet/FacetItemsList';
 import { translate } from '../../../helpers/l10n';
-import { formatFacetStat } from '../utils';
+import { formatFacetStat, Query } from '../utils';
 
-/*::
-type Props = {|
-  facetMode: string,
-  onChange: (changes: { [string]: Array<string> }) => void,
-  onToggle: (property: string) => void,
-  open: boolean,
-  stats?: { [string]: number },
-  statuses: Array<string>
-|};
-*/
+interface Props {
+  facetMode: string;
+  onChange: (changes: Partial<Query>) => void;
+  onToggle: (property: string) => void;
+  open: boolean;
+  resolved: boolean;
+  resolutions: Array<string>;
+  stats: { [x: string]: number } | undefined;
+}
 
-export default class StatusFacet extends React.PureComponent {
-  /*:: props: Props; */
-
-  property = 'statuses';
+export default class ResolutionFacet extends React.PureComponent<Props> {
+  property = 'resolutions';
 
   static defaultProps = {
     open: true
   };
 
-  handleItemClick = (itemValue /*: string */) => {
-    const { statuses } = this.props;
-    const newValue = orderBy(
-      statuses.includes(itemValue) ? without(statuses, itemValue) : [...statuses, itemValue]
-    );
-    this.props.onChange({ [this.property]: newValue });
+  handleItemClick = (itemValue: string) => {
+    if (itemValue === '') {
+      // unresolved
+      this.props.onChange({ resolved: !this.props.resolved, resolutions: [] });
+    } else {
+      // defined resolution
+      const { resolutions } = this.props;
+      const newValue = orderBy(
+        resolutions.includes(itemValue)
+          ? without(resolutions, itemValue)
+          : [...resolutions, itemValue]
+      );
+      this.props.onChange({ resolved: true, resolutions: newValue });
+    }
   };
 
   handleHeaderClick = () => {
@@ -60,43 +64,43 @@ export default class StatusFacet extends React.PureComponent {
   };
 
   handleClear = () => {
-    this.props.onChange({ [this.property]: [] });
+    this.props.onChange({ resolved: false, resolutions: [] });
   };
 
-  getStat(status /*: string */) /*: ?number */ {
+  isFacetItemActive(resolution: string) {
+    return resolution === '' ? !this.props.resolved : this.props.resolutions.includes(resolution);
+  }
+
+  getFacetItemName(resolution: string) {
+    return resolution === '' ? translate('unresolved') : translate('issue.resolution', resolution);
+  }
+
+  getStat(resolution: string) {
     const { stats } = this.props;
-    return stats ? stats[status] : null;
+    return stats ? stats[resolution] : undefined;
   }
 
-  renderStatus(status /*: string */) {
-    return (
-      <span>
-        <i className={`icon-status-${status.toLowerCase()}`} /> {translate('issue.status', status)}
-      </span>
-    );
-  }
-
-  renderItem = (status /*: string */) => {
-    const active = this.props.statuses.includes(status);
-    const stat = this.getStat(status);
+  renderItem = (resolution: string) => {
+    const active = this.isFacetItemActive(resolution);
+    const stat = this.getStat(resolution);
 
     return (
       <FacetItem
         active={active}
         disabled={stat === 0 && !active}
         halfWidth={true}
-        key={status}
-        name={this.renderStatus(status)}
+        key={resolution}
+        name={this.getFacetItemName(resolution)}
         onClick={this.handleItemClick}
         stat={formatFacetStat(stat, this.props.facetMode)}
-        value={status}
+        value={resolution}
       />
     );
   };
 
   render() {
-    const statuses = ['OPEN', 'RESOLVED', 'REOPENED', 'CLOSED', 'CONFIRMED'];
-    const values = this.props.statuses.map(status => translate('issue.status', status));
+    const resolutions = ['', 'FIXED', 'FALSE-POSITIVE', 'WONTFIX', 'REMOVED'];
+    const values = this.props.resolutions.map(resolution => this.getFacetItemName(resolution));
 
     return (
       <FacetBox property={this.property}>
@@ -108,7 +112,7 @@ export default class StatusFacet extends React.PureComponent {
           values={values}
         />
 
-        {this.props.open && <FacetItemsList>{statuses.map(this.renderItem)}</FacetItemsList>}
+        {this.props.open && <FacetItemsList>{resolutions.map(this.renderItem)}</FacetItemsList>}
       </FacetBox>
     );
   }

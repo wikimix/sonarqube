@@ -17,8 +17,7 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
-// @flow
-import React from 'react';
+import * as React from 'react';
 import AssigneeFacet from './AssigneeFacet';
 import AuthorFacet from './AuthorFacet';
 import CreationDateFacet from './CreationDateFacet';
@@ -34,39 +33,29 @@ import SeverityFacet from './SeverityFacet';
 import StatusFacet from './StatusFacet';
 import TagFacet from './TagFacet';
 import TypeFacet from './TypeFacet';
-/*:: import type {
-  Query,
-  Facet,
-  ReferencedComponent,
-  ReferencedUser,
-  ReferencedLanguage,
-  Component
-} from '../utils'; */
+import { Query, Facet, ReferencedComponent, ReferencedUser, ReferencedLanguage } from '../utils';
+import { Component } from '../../../app/types';
 
-/*::
-type Props = {|
-  component?: Component,
-  facets: { [string]: Facet },
-  myIssues: boolean,
-  onFacetToggle: (property: string) => void,
-  onFilterChange: (changes: { [string]: Array<string> }) => void,
-  openFacets: { [string]: boolean },
-  organization?: { key: string },
-  query: Query,
-  referencedComponents: { [string]: ReferencedComponent },
-  referencedLanguages: { [string]: ReferencedLanguage },
-  referencedRules: { [string]: { name: string } },
-  referencedUsers: { [string]: ReferencedUser }
-|};
-*/
+interface Props {
+  component: Component | undefined;
+  facets: { [facet: string]: Facet };
+  myIssues: boolean;
+  onFacetToggle: (property: string) => void;
+  onFilterChange: (changes: Partial<Query>) => void;
+  openFacets: { [facet: string]: boolean };
+  organization: { key: string } | undefined;
+  query: Query;
+  referencedComponents: { [componentKey: string]: ReferencedComponent };
+  referencedLanguages: { [languageKey: string]: ReferencedLanguage };
+  referencedRules: { [ruleKey: string]: { name: string } };
+  referencedUsers: { [login: string]: ReferencedUser };
+}
 
-export default class Sidebar extends React.PureComponent {
-  /*:: props: Props; */
-
+export default class Sidebar extends React.PureComponent<Props> {
   render() {
     const { component, facets, openFacets, query } = this.props;
 
-    const displayProjectsFacet /*: boolean */ =
+    const displayProjectsFacet =
       component == null || !['TRK', 'BRC', 'DIR', 'DEV_PRJ'].includes(component.qualifier);
     const displayModulesFacet = component != null && component.qualifier !== 'DIR';
     const displayDirectoriesFacet = component != null && component.qualifier !== 'DIR';
@@ -97,8 +86,8 @@ export default class Sidebar extends React.PureComponent {
           onChange={this.props.onFilterChange}
           onToggle={this.props.onFacetToggle}
           open={!!openFacets.resolutions}
-          resolved={query.resolved}
           resolutions={query.resolutions}
+          resolved={query.resolved}
           stats={facets.resolutions}
         />
         <StatusFacet
@@ -127,11 +116,11 @@ export default class Sidebar extends React.PureComponent {
           languages={query.languages}
           onChange={this.props.onFilterChange}
           onToggle={this.props.onFacetToggle}
-          organization={this.props.organization && this.props.organization.key}
           open={!!openFacets.rules}
-          stats={facets.rules}
+          organization={this.props.organization && this.props.organization.key}
           referencedRules={this.props.referencedRules}
           rules={query.rules}
+          stats={facets.rules}
         />
         <TagFacet
           component={component}
@@ -159,21 +148,21 @@ export default class Sidebar extends React.PureComponent {
         {displayModulesFacet && (
           <ModuleFacet
             facetMode={query.facetMode}
+            modules={query.modules}
             onChange={this.props.onFilterChange}
             onToggle={this.props.onFacetToggle}
             open={!!openFacets.modules}
-            modules={query.modules}
             referencedComponents={this.props.referencedComponents}
             stats={facets.modules}
           />
         )}
         {displayDirectoriesFacet && (
           <DirectoryFacet
+            directories={query.directories}
             facetMode={query.facetMode}
             onChange={this.props.onFilterChange}
             onToggle={this.props.onFacetToggle}
             open={!!openFacets.directories}
-            directories={query.directories}
             referencedComponents={this.props.referencedComponents}
             stats={facets.directories}
           />
@@ -181,10 +170,10 @@ export default class Sidebar extends React.PureComponent {
         {displayFilesFacet && (
           <FileFacet
             facetMode={query.facetMode}
+            files={query.files}
             onChange={this.props.onFilterChange}
             onToggle={this.props.onFacetToggle}
             open={!!openFacets.files}
-            files={query.files}
             referencedComponents={this.props.referencedComponents}
             stats={facets.files}
           />

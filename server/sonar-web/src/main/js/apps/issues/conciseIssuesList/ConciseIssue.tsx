@@ -17,29 +17,24 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
-// @flow
-import React from 'react';
+import * as React from 'react';
 import ConciseIssueBox from './ConciseIssueBox';
 import ConciseIssueComponent from './ConciseIssueComponent';
-/*:: import type { Issue } from '../../../components/issue/types'; */
+import { Issue } from '../../../app/types';
 
-/*::
-type Props = {|
-  issue: Issue,
-  onFlowSelect: number => void,
-  onLocationSelect: number => void,
-  onSelect: string => void,
-  previousIssue: ?Issue,
-  scroll: HTMLElement => void,
-  selected: boolean,
-  selectedFlowIndex: ?number,
-  selectedLocationIndex: ?number
-|};
-*/
+interface Props {
+  issue: Issue;
+  onFlowSelect: (index: number) => void;
+  onLocationSelect: (index: number) => void;
+  onSelect: (issueKey: string) => void;
+  previousIssue: Issue | undefined;
+  scroll: (element: Element) => void;
+  selected: boolean;
+  selectedFlowIndex: number | undefined;
+  selectedLocationIndex: number | undefined;
+}
 
-export default class ConciseIssue extends React.PureComponent {
-  /*:: props: Props; */
-
+export default class ConciseIssue extends React.PureComponent<Props> {
   render() {
     const { issue, previousIssue, selected } = this.props;
 
@@ -55,8 +50,8 @@ export default class ConciseIssue extends React.PureComponent {
           onLocationSelect={this.props.onLocationSelect}
           scroll={this.props.scroll}
           selected={selected}
-          selectedFlowIndex={selected ? this.props.selectedFlowIndex : null}
-          selectedLocationIndex={selected ? this.props.selectedLocationIndex : null}
+          selectedFlowIndex={selected ? this.props.selectedFlowIndex : undefined}
+          selectedLocationIndex={selected ? this.props.selectedLocationIndex : undefined}
         />
       </div>
     );

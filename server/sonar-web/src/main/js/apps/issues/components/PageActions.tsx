@@ -17,29 +17,23 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
-// @flow
-import React from 'react';
+import * as React from 'react';
 import IssuesCounter from './IssuesCounter';
 import ReloadButton from './ReloadButton';
-/*:: import type { Paging } from '../utils'; */
-import { HomePageType } from '../../../app/types';
+import { HomePageType, Paging } from '../../../app/types';
 import DeferredSpinner from '../../../components/common/DeferredSpinner';
 import HomePageSelect from '../../../components/controls/HomePageSelect';
 import { translate } from '../../../helpers/l10n';
 
-/*::
-type Props = {|
-  canSetHome: bool,
-  loading: boolean,
-  onReload: () => void,
-  paging: ?Paging,
-  selectedIndex: ?number
-|};
-*/
+interface Props {
+  canSetHome?: boolean;
+  loading: boolean;
+  onReload: () => void;
+  paging: Paging | undefined;
+  selectedIndex: number | undefined;
+}
 
-export default class PageActions extends React.PureComponent {
-  /*:: props: Props; */
-
+export default class PageActions extends React.PureComponent<Props> {
   renderShortcuts() {
     return (
       <span className="note big-spacer-right">

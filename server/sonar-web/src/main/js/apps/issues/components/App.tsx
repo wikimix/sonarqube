@@ -17,12 +17,11 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
-// @flow
-import React from 'react';
+import * as React from 'react';
 import Helmet from 'react-helmet';
-import key from 'keymaster';
+import * as key from 'keymaster';
 import { keyBy, without } from 'lodash';
-import PropTypes from 'prop-types';
+import * as PropTypes from 'prop-types';
 import PageActions from './PageActions';
 import MyIssuesFilter from './MyIssuesFilter';
 import IssuesList from './IssuesList';
@@ -42,7 +41,12 @@ import {
   serializeQuery,
   parseFacets,
   mapFacet,
-  saveMyIssues
+  saveMyIssues,
+  Facet,
+  Query,
+  ReferencedComponent,
+  ReferencedLanguage,
+  ReferencedUser
 } from '../utils';
 /*:: import type {
   Query,
@@ -55,7 +59,7 @@ import {
   CurrentUser
 } from '../utils'; */
 import handleRequiredAuthentication from '../../../app/utils/handleRequiredAuthentication';
-import { isLoggedIn } from '../../../app/types';
+import { isLoggedIn, Component, CurrentUser, Issue, Paging, Branch } from '../../../app/types';
 import ListFooter from '../../../components/controls/ListFooter';
 import EmptySearch from '../../../components/common/EmptySearch';
 import FiltersHeader from '../../../components/common/FiltersHeader';
@@ -66,60 +70,52 @@ import { scrollToElement } from '../../../helpers/scrolling';
 /*:: import type { Issue } from '../../../components/issue/types'; */
 /*:: import type { RawQuery } from '../../../helpers/query'; */
 import '../styles.css';
+import { RawQuery } from '../../../helpers/query';
 
-/*::
-export type Props = {
-  branch?: { name: string },
-  component?: Component,
-  currentUser: CurrentUser,
-  fetchIssues: (query: RawQuery, requestOrganizations?: boolean) => Promise<*>,
-  location: { pathname: string, query: RawQuery },
-  myIssues?: bool;
-  onBranchesChange: () => void,
-  onSonarCloud: bool,
-  organization?: { key: string },
-};
-*/
+interface Props {
+  branch?: Branch;
+  component?: Component;
+  currentUser: CurrentUser;
+  fetchIssues: (query: RawQuery, requestOrganizations?: boolean) => Promise<any>;
+  location: { pathname: string; query: RawQuery };
+  myIssues?: boolean;
+  onBranchesChange: () => void;
+  onSonarCloud: boolean;
+  organization?: { key: string };
+}
 
-/*::
-export type State = {
-  bulkChange: 'all' | 'selected' | null,
-  checked: Array<string>,
-  facets: { [string]: Facet },
-  issues: Array<Issue>,
-  loading: boolean,
-  locationsNavigator: boolean,
-  myIssues: boolean,
-  openFacets: { [string]: boolean },
-  openIssue: ?Issue,
-  openPopup: ?{
-    issue: string,
-    name: string
-  },
-  paging?: Paging,
-  query: Query,
-  referencedComponents: { [string]: ReferencedComponent },
-  referencedLanguages: { [string]: ReferencedLanguage },
-  referencedRules: { [string]: { name: string } },
-  referencedUsers: { [string]: ReferencedUser },
-  selected?: string,
-  selectedFlowIndex: ?number,
-  selectedLocationIndex: ?number
-};
-*/
+export interface State {
+  bulkChange: 'all' | 'selected' | null;
+  checked: string[];
+  facets: { [facet: string]: Facet };
+  issues: Issue[];
+  loading: boolean;
+  locationsNavigator: boolean;
+  myIssues: boolean;
+  openFacets: { [facet: string]: boolean };
+  openIssue?: Issue;
+  openPopup?: { issue: string; name: string };
+  paging?: Paging;
+  query: Query;
+  referencedComponents: { [componentKey: string]: ReferencedComponent };
+  referencedLanguages: { [languageKey: string]: ReferencedLanguage };
+  referencedRules: { [ruleKey: string]: { name: string } };
+  referencedUsers: { [login: string]: ReferencedUser };
+  selected?: string;
+  selectedFlowIndex?: number;
+  selectedLocationIndex?: number;
+}
 
 const DEFAULT_QUERY = { resolved: 'false' };
 
-export default class App extends React.PureComponent {
-  /*:: mounted: boolean; */
-  /*:: props: Props; */
-  /*:: state: State; */
+export default class App extends React.PureComponent<Props, State> {
+  mounted = false;
 
   static contextTypes = {
     router: PropTypes.object.isRequired
   };
 
-  constructor(props /*: Props */) {
+  constructor(props: Props) {
     super(props);
     this.state = {
       bulkChange: null,
@@ -130,16 +126,12 @@ export default class App extends React.PureComponent {
       locationsNavigator: false,
       myIssues: props.myIssues || areMyIssuesSelected(props.location.query),
       openFacets: { severities: true, types: true },
-      openIssue: null,
-      openPopup: null,
       query: parseQuery(props.location.query),
       referencedComponents: {},
       referencedLanguages: {},
       referencedRules: {},
       referencedUsers: {},
-      selected: getOpen(props.location.query),
-      selectedFlowIndex: null,
-      selectedLocationIndex: null
+      selected: getOpen(props.location.query)
     };
   }
 
@@ -151,7 +143,6 @@ export default class App extends React.PureComponent {
       return;
     }
 
-    // $FlowFixMe
     document.body.classList.add('white-page');
 
     const footer = document.getElementById('footer');
@@ -163,20 +154,20 @@ export default class App extends React.PureComponent {
     this.fetchFirstIssues();
   }
 
-  componentWillReceiveProps(nextProps /*: Props */) {
+  componentWillReceiveProps(nextProps: Props) {
     const openIssue = this.getOpenIssue(nextProps, this.state.issues);
 
     if (openIssue != null && openIssue.key !== this.state.selected) {
       this.setState({
         locationsNavigator: false,
         selected: openIssue.key,
-        selectedFlowIndex: null,
-        selectedLocationIndex: null
+        selectedFlowIndex: undefined,
+        selectedLocationIndex: undefined
       });
     }
 
     if (openIssue == null) {
-      this.setState({ selectedFlowIndex: null, selectedLocationIndex: null });
+      this.setState({ selectedFlowIndex: undefined, selectedLocationIndex: undefined });
     }
 
     this.setState({
@@ -186,7 +177,7 @@ export default class App extends React.PureComponent {
     });
   }
 
-  componentDidUpdate(prevProps /*: Props */, prevState /*: State */) {
+  componentDidUpdate(prevProps: Props, prevState: State) {
     const { query } = this.props.location;
     const { query: prevQuery } = prevProps.location;
     if (
@@ -209,7 +200,6 @@ export default class App extends React.PureComponent {
   componentWillUnmount() {
     this.detachShortcuts();
 
-    // $FlowFixMe
     document.body.classList.remove('white-page');
 
     const footer = document.getElementById('footer');
@@ -248,7 +238,7 @@ export default class App extends React.PureComponent {
     window.removeEventListener('keyup', this.handleKeyUp);
   }
 
-  handleKeyDown = (event /*: KeyboardEvent */) => {
+  handleKeyDown = (event: KeyboardEvent) => {
     if (key.getScope() !== 'issues') {
       return;
     }
@@ -275,7 +265,7 @@ export default class App extends React.PureComponent {
     }
   };
 
-  handleKeyUp = (event /*: KeyboardEvent */) => {
+  handleKeyUp = (event: KeyboardEvent) => {
     if (key.getScope() !== 'issues') {
       return;
     }
@@ -285,15 +275,15 @@ export default class App extends React.PureComponent {
     }
   };
 
-  getSelectedIndex() /*: ?number */ {
+  getSelectedIndex() {
     const { issues, selected } = this.state;
     const index = issues.findIndex(issue => issue.key === selected);
-    return index !== -1 ? index : null;
+    return index !== -1 ? index : undefined;
   }
 
-  getOpenIssue = (props /*: Props */, issues /*: Array<Issue> */) => {
+  getOpenIssue = (props: Props, issues: Issue[]) => {
     const open = getOpen(props.location.query);
-    return open ? issues.find(issue => issue.key === open) : null;
+    return open ? issues.find(issue => issue.key === open) : undefined;
   };
 
   selectNextIssue = () => {
@@ -305,8 +295,8 @@ export default class App extends React.PureComponent {
       } else {
         this.setState({
           selected: issues[selectedIndex + 1].key,
-          selectedFlowIndex: null,
-          selectedLocationIndex: null
+          selectedFlowIndex: undefined,
+          selectedLocationIndex: undefined
         });
       }
     }
@@ -321,14 +311,14 @@ export default class App extends React.PureComponent {
       } else {
         this.setState({
           selected: issues[selectedIndex - 1].key,
-          selectedFlowIndex: null,
-          selectedLocationIndex: null
+          selectedFlowIndex: undefined,
+          selectedLocationIndex: undefined
         });
       }
     }
   };
 
-  openIssue = (issue /*: string */) => {
+  openIssue = (issueKey: string) => {
     const path = {
       pathname: this.props.location.pathname,
       query: {
@@ -336,7 +326,7 @@ export default class App extends React.PureComponent {
         branch: getBranchName(this.props.branch),
         id: this.props.component && this.props.component.key,
         myIssues: this.state.myIssues ? 'true' : undefined,
-        open: issue
+        open: issueKey
       }
     };
     if (this.state.openIssue) {
@@ -369,7 +359,7 @@ export default class App extends React.PureComponent {
     }
   };
 
-  scrollToSelectedIssue = (smooth /*: boolean */ = true) => {
+  scrollToSelectedIssue = (smooth = true) => {
     const { selected } = this.state;
     if (selected) {
       const element = document.querySelector(`[data-issue="${selected}"]`);
@@ -379,11 +369,7 @@ export default class App extends React.PureComponent {
     }
   };
 
-  fetchIssues = (
-    additional /*: ?{} */,
-    requestFacets /*: ?boolean */ = false,
-    requestOrganizations /*: boolean | void */ = true
-  ) => {
+  fetchIssues = (additional: RawQuery, requestFacets = false, requestOrganizations = true) => {
     const { component, organization } = this.props;
     const { myIssues, openFacets, query } = this.state;
 
@@ -435,8 +421,8 @@ export default class App extends React.PureComponent {
             referencedUsers: keyBy(other.users, 'login'),
             selected:
               issues.length > 0 ? (openIssue != null ? openIssue.key : issues[0].key) : undefined,
-            selectedFlowIndex: null,
-            selectedLocationIndex: null
+            selectedFlowIndex: undefined,
+            selectedLocationIndex: undefined
           });
         }
         return issues;
@@ -450,11 +436,14 @@ export default class App extends React.PureComponent {
     );
   }
 
-  fetchIssuesPage = (p /*: number */) => {
+  fetchIssuesPage = (p: number) => {
     return this.fetchIssues({ p });
   };
 
-  fetchIssuesUntil = (p /*: number */, done /*: (Array<Issue>, Paging) => boolean */) => {
+  fetchIssuesUntil = (
+    p: number,
+    done: (issues: Issue[], paging: Paging) => boolean
+  ): Promise<{ issues: Issue[]; paging: Paging }> => {
     return this.fetchIssuesPage(p).then(response => {
       const { issues, paging } = response;
 
@@ -497,16 +486,16 @@ export default class App extends React.PureComponent {
     );
   };
 
-  fetchIssuesForComponent = (component /*: string */, from /*: number */, to /*: number */) => {
+  fetchIssuesForComponent = (_component: string, _from: number, to: number): Promise<Issue[]> => {
     const { issues, openIssue, paging } = this.state;
 
     if (!openIssue || !paging) {
-      return Promise.reject();
+      return Promise.reject(undefined);
     }
 
-    const isSameComponent = (issue /*: Issue */) => issue.component === openIssue.component;
+    const isSameComponent = (issue: Issue) => issue.component === openIssue.component;
 
-    const done = (issues /*: Array<Issue> */, paging /*: Paging */) => {
+    const done = (issues: Issue[], paging: Paging) => {
       if (paging.total <= paging.pageIndex * paging.pageSize) {
         return true;
       }
@@ -538,11 +527,12 @@ export default class App extends React.PureComponent {
         if (this.mounted) {
           this.setState({ loading: false });
         }
+        return [];
       }
     );
   };
 
-  fetchFacet = (facet /*: string */) => {
+  fetchFacet = (facet: string) => {
     const requestOrganizations = facet === 'projects';
     return this.fetchIssues({ ps: 1, facets: mapFacet(facet) }, false, requestOrganizations).then(
       ({ facets, ...other }) => {
@@ -585,7 +575,7 @@ export default class App extends React.PureComponent {
     return Promise.resolve({ issues, paging });
   };
 
-  handleFilterChange = (changes /*: {} */) => {
+  handleFilterChange = (changes: Partial<Query>) => {
     this.context.router.push({
       pathname: this.props.location.pathname,
       query: {
@@ -597,7 +587,7 @@ export default class App extends React.PureComponent {
     });
   };
 
-  handleMyIssuesChange = (myIssues /*: boolean */) => {
+  handleMyIssuesChange = (myIssues: boolean) => {
     this.closeFacet('assignees');
     if (!this.props.component) {
       saveMyIssues(myIssues);
@@ -613,13 +603,13 @@ export default class App extends React.PureComponent {
     });
   };
 
-  closeFacet = (property /*: string */) => {
+  closeFacet = (property: string) => {
     this.setState(state => ({
       openFacets: { ...state.openFacets, [property]: false }
     }));
   };
 
-  handleFacetToggle = (property /*: string */) => {
+  handleFacetToggle = (property: string) => {
     this.setState(state => ({
       openFacets: { ...state.openFacets, [property]: !state.openFacets[property] }
     }));
@@ -640,8 +630,8 @@ export default class App extends React.PureComponent {
     });
   };
 
-  handlePopupToggle = (issue /*: string */, popupName /*: string */, open /*: ?boolean */) => {
-    this.setState((state /*: State */) => {
+  handlePopupToggle = (issue: string, popupName: string, open?: boolean) => {
+    this.setState((state: State) => {
       const samePopup =
         state.openPopup && state.openPopup.name === popupName && state.openPopup.issue === issue;
       if (open !== false && !samePopup) {
@@ -653,7 +643,7 @@ export default class App extends React.PureComponent {
     });
   };
 
-  handleIssueCheck = (issue /*: string */) => {
+  handleIssueCheck = (issue: string) => {
     this.setState(state => ({
       checked: state.checked.includes(issue)
         ? without(state.checked, issue)
@@ -661,13 +651,13 @@ export default class App extends React.PureComponent {
     }));
   };
 
-  handleIssueChange = (issue /*: Issue */) => {
+  handleIssueChange = (issue: Issue) => {
     this.setState(state => ({
       issues: state.issues.map(candidate => (candidate.key === issue.key ? issue : candidate))
     }));
   };
 
-  openBulkChange = (mode /*: 'all' | 'selected' */) => {
+  openBulkChange = (mode: 'all' | 'selected') => {
     this.setState({ bulkChange: mode });
     key.setScope('issues-bulk-change');
   };
@@ -677,15 +667,15 @@ export default class App extends React.PureComponent {
     this.setState({ bulkChange: null });
   };
 
-  handleBulkChangeClick = (e /*: Event & { target: HTMLElement } */) => {
-    e.preventDefault();
-    e.target.blur();
+  handleBulkChangeClick = (event: React.MouseEvent<HTMLAnchorElement>) => {
+    event.preventDefault();
+    event.currentTarget.blur();
     this.openBulkChange('all');
   };
 
-  handleBulkChangeSelectedClick = (e /*: Event & { target: HTMLElement } */) => {
+  handleBulkChangeSelectedClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
     e.preventDefault();
-    e.target.blur();
+    e.currentTarget.blur();
     this.openBulkChange('selected');
   };
 
@@ -709,14 +699,14 @@ export default class App extends React.PureComponent {
     });
   };
 
-  selectLocation = (index /*: ?number */) => this.setState(actions.selectLocation(index));
+  selectLocation = (index?: number) => this.setState(actions.selectLocation(index));
   selectNextLocation = () => this.setState(actions.selectNextLocation);
   selectPreviousLocation = () => this.setState(actions.selectPreviousLocation);
-  selectFlow = (index /*: ?number */) => this.setState(actions.selectFlow(index));
+  selectFlow = (index?: number) => this.setState(actions.selectFlow(index));
   selectNextFlow = () => this.setState(actions.selectNextFlow);
   selectPreviousFlow = () => this.setState(actions.selectPreviousFlow);
 
-  renderBulkChange(openIssue /*: ?Issue */) {
+  renderBulkChange(openIssue: Issue | undefined) {
     const { component, currentUser } = this.props;
     const { bulkChange, checked, paging } = this.state;
 
@@ -820,16 +810,16 @@ export default class App extends React.PureComponent {
         {paging != null &&
           paging.total > 0 && (
             <ListFooter
-              total={paging.total}
               count={issues.length}
               loadMore={this.fetchMoreIssues}
+              total={paging.total}
             />
           )}
       </div>
     );
   }
 
-  renderSide(openIssue /*: ?Issue */) {
+  renderSide(openIssue: Issue | undefined) {
     return (
       <ScreenPositionHelper className="layout-page-side-outer">
         {({ top }) => (
@@ -847,7 +837,7 @@ export default class App extends React.PureComponent {
     const { branch, component, currentUser, organization } = this.props;
     const { issues, openIssue, paging } = this.state;
     const selectedIndex = this.getSelectedIndex();
-    const selectedIssue = selectedIndex != null ? issues[selectedIndex] : null;
+    const selectedIssue = selectedIndex != null ? issues[selectedIndex] : undefined;
 
     if (paging == null || openIssue != null) {
       return null;
@@ -873,7 +863,7 @@ export default class App extends React.PureComponent {
         )}
 
         {paging.total > 0 && (
-          <ListFooter total={paging.total} count={issues.length} loadMore={this.fetchMoreIssues} />
+          <ListFooter count={issues.length} loadMore={this.fetchMoreIssues} total={paging.total} />
         )}
 
         {paging.total === 0 &&
@@ -954,15 +944,14 @@ export default class App extends React.PureComponent {
               {openIssue ? (
                 <IssuesSourceViewer
                   branch={getBranchName(this.props.branch)}
-                  component={component}
-                  openIssue={openIssue}
                   loadIssues={this.fetchIssuesForComponent}
                   onIssueChange={this.handleIssueChange}
                   onIssueSelect={this.openIssue}
                   onLocationSelect={this.selectLocation}
+                  openIssue={openIssue}
                   selectedFlowIndex={this.state.selectedFlowIndex}
                   selectedLocationIndex={
-                    this.state.locationsNavigator ? this.state.selectedLocationIndex : null
+                    this.state.locationsNavigator ? this.state.selectedLocationIndex : undefined
                   }
                 />
               ) : (

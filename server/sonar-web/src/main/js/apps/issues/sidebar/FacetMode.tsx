@@ -17,27 +17,23 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
-// @flow
-import React from 'react';
+import * as React from 'react';
+import { Query } from '../utils';
 import FacetBox from '../../../components/facet/FacetBox';
 import FacetHeader from '../../../components/facet/FacetHeader';
 import FacetItem from '../../../components/facet/FacetItem';
 import FacetItemsList from '../../../components/facet/FacetItemsList';
 import { translate } from '../../../helpers/l10n';
 
-/*::
-type Props = {|
-  facetMode: string,
-  onChange: (changes: {}) => void
-|};
-*/
+interface Props {
+  facetMode: string;
+  onChange: (changes: Partial<Query>) => void;
+}
 
-export default class FacetMode extends React.PureComponent {
-  /*:: props: Props; */
-
+export default class FacetMode extends React.PureComponent<Props> {
   property = 'facetMode';
 
-  handleItemClick = (itemValue /*: string */) => {
+  handleItemClick = (itemValue: string) => {
     this.props.onChange({ [this.property]: itemValue });
   };
 
@@ -47,7 +43,7 @@ export default class FacetMode extends React.PureComponent {
 
     return (
       <FacetBox property={this.property}>
-        <FacetHeader name={translate('issues.facet.mode')} />
+        <FacetHeader name={translate('issues.facet.mode')} open={false} />
 
         <FacetItemsList>
           {modes.map(mode => (

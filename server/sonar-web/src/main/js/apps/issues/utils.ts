@@ -17,7 +17,6 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
-// @flow
 import { searchMembers } from '../../api/organizations';
 import { searchUsers } from '../../api/users';
 import { formatMeasure } from '../../helpers/measures';
@@ -29,50 +28,40 @@ import {
   parseAsArray,
   parseAsString,
   serializeString,
-  serializeStringArray
+  serializeStringArray,
+  RawQuery
 } from '../../helpers/query';
-/*:: import type { RawQuery } from '../../helpers/query'; */
 
-/*::
-export type Query = {|
-  assigned: boolean,
-  assignees: Array<string>,
-  authors: Array<string>,
-  createdAfter: string,
-  createdAt: string,
-  createdBefore: string,
-  createdInLast: string,
-  directories: Array<string>,
-  facetMode: string,
-  files: Array<string>,
-  issues: Array<string>,
-  languages: Array<string>,
-  modules: Array<string>,
-  projects: Array<string>,
-  resolved: boolean,
-  resolutions: Array<string>,
-  rules: Array<string>,
-  sort: string,
-  severities: Array<string>,
-  sinceLeakPeriod: boolean,
-  statuses: Array<string>,
-  tags: Array<string>,
-  types: Array<string>
-|};
-*/
-
-/*::
-export type Paging = {
-  pageIndex: number,
-  pageSize: number,
-  total: number
-};
-*/
+export interface Query {
+  assigned: boolean;
+  assignees: string[];
+  authors: string[];
+  createdAfter: string;
+  createdAt: string;
+  createdBefore: string;
+  createdInLast: string;
+  directories: string[];
+  facetMode: string;
+  files: string[];
+  issues: string[];
+  languages: string[];
+  modules: string[];
+  projects: string[];
+  resolved: boolean;
+  resolutions: string[];
+  rules: string[];
+  sort: string;
+  severities: string[];
+  sinceLeakPeriod: boolean;
+  statuses: string[];
+  tags: string[];
+  types: string[];
+}
 
 // allow sorting by CREATION_DATE only
-const parseAsSort = (sort /*: string */) => (sort === 'CREATION_DATE' ? 'CREATION_DATE' : '');
+const parseAsSort = (sort: string) => (sort === 'CREATION_DATE' ? 'CREATION_DATE' : '');
 
-export function parseQuery(query /*: RawQuery */) /*: Query */ {
+export function parseQuery(query: RawQuery): Query {
   return {
     assigned: parseAsBoolean(query.assigned),
     assignees: parseAsArray(query.assignees, parseAsString),
@@ -100,13 +89,13 @@ export function parseQuery(query /*: RawQuery */) /*: Query */ {
   };
 }
 
-export function getOpen(query /*: RawQuery */) /*: string */ {
+export function getOpen(query: RawQuery): string {
   return query.open;
 }
 
-export const areMyIssuesSelected = (query /*: RawQuery */) => query.myIssues === 'true';
+export const areMyIssuesSelected = (query: RawQuery) => query.myIssues === 'true';
 
-export function serializeQuery(query /*: Query */) /*: RawQuery */ {
+export function serializeQuery(query: Query): RawQuery {
   const filter = {
     assigned: query.assigned ? undefined : 'false',
     assignees: serializeStringArray(query.assignees),
@@ -135,22 +124,20 @@ export function serializeQuery(query /*: Query */) /*: RawQuery */ {
   return cleanQuery(filter);
 }
 
-export const areQueriesEqual = (a /*: RawQuery */, b /*: RawQuery */) =>
+export const areQueriesEqual = (a: RawQuery, b: RawQuery) =>
   queriesEqual(parseQuery(a), parseQuery(b));
 
-/*::
-type RawFacet = {
-  property: string,
-  values: Array<{ val: string, count: number }>
-};
-*/
+interface RawFacet {
+  property: string;
+  values: Array<{ val: string; count: number }>;
+}
 
-/*::
-export type Facet = { [string]: number };
-*/
+export interface Facet {
+  [value: string]: number;
+}
 
-export function mapFacet(facet /*: string */) /*: string */ {
-  const propertyMapping = {
+export function mapFacet(facet: string) {
+  const propertyMapping: { [x: string]: string } = {
     files: 'fileUuids',
     modules: 'moduleUuids',
     projects: 'projectUuids'
@@ -158,17 +145,17 @@ export function mapFacet(facet /*: string */) /*: string */ {
   return propertyMapping[facet] || facet;
 }
 
-export function parseFacets(facets /*: Array<RawFacet> */) /*: { [string]: Facet } */ {
+export function parseFacets(facets: RawFacet[]) {
   // for readability purpose
-  const propertyMapping = {
+  const propertyMapping: { [x: string]: string } = {
     fileUuids: 'files',
     moduleUuids: 'modules',
     projectUuids: 'projects'
   };
 
-  const result = {};
+  const result: { [x: string]: Facet } = {};
   facets.forEach(facet => {
-    const values = {};
+    const values: Facet = {};
     facet.values.forEach(value => {
       values[value.val] = value.count;
     });
@@ -178,50 +165,27 @@ export function parseFacets(facets /*: Array<RawFacet> */) /*: { [string]: Facet
   return result;
 }
 
-export function formatFacetStat(stat /*: ?number */, mode /*: string */) /*: string | void */ {
-  if (stat != null) {
-    return formatMeasure(stat, mode === 'effort' ? 'SHORT_WORK_DUR' : 'SHORT_INT');
-  }
+export function formatFacetStat(stat: number | undefined, mode: string) {
+  return stat && formatMeasure(stat, mode === 'effort' ? 'SHORT_WORK_DUR' : 'SHORT_INT');
 }
 
-/*::
-export type ReferencedComponent = {
-  key: string,
-  name: string,
-  organization: string,
-  path: string
-};
-*/
+export interface ReferencedComponent {
+  key: string;
+  name: string;
+  organization: string;
+  path: string;
+}
 
-/*::
-export type ReferencedUser = {
-  avatar: string,
-  name: string
-};
-*/
+export interface ReferencedUser {
+  avatar: string;
+  name: string;
+}
 
-/*::
-export type ReferencedLanguage = {
-  name: string
-};
-*/
+export interface ReferencedLanguage {
+  name: string;
+}
 
-/*::
-export type Component = {
-  key: string,
-  name: string,
-  organization: string,
-  qualifier: string
-};
-*/
-
-/*::
-export type CurrentUser =
-  | { isLoggedIn: false }
-  | { isLoggedIn: true, avatar:string, email?: string, login: string, name: string };
-*/
-
-export const searchAssignees = (query /*: string */, organization /*: ?string */) => {
+export const searchAssignees = (query: string, organization?: string) => {
   return organization
     ? searchMembers({ organization, ps: 50, q: query }).then(response =>
         response.users.map(user => ({
@@ -250,7 +214,7 @@ export const isMySet = () => {
   return setting === LOCALSTORAGE_MY;
 };
 
-const save = (value /*: string */) => {
+const save = (value: string) => {
   try {
     window.localStorage.setItem(LOCALSTORAGE_KEY, value);
   } catch (e) {
@@ -259,5 +223,5 @@ const save = (value /*: string */) => {
   }
 };
 
-export const saveMyIssues = (myIssues /*: boolean */) =>
+export const saveMyIssues = (myIssues: boolean) =>
   save(myIssues ? LOCALSTORAGE_MY : LOCALSTORAGE_ALL);

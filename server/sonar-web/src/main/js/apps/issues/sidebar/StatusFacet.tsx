@@ -17,41 +17,35 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
-// @flow
-import React from 'react';
+import * as React from 'react';
 import { orderBy, without } from 'lodash';
 import FacetBox from '../../../components/facet/FacetBox';
 import FacetHeader from '../../../components/facet/FacetHeader';
 import FacetItem from '../../../components/facet/FacetItem';
 import FacetItemsList from '../../../components/facet/FacetItemsList';
-import IssueTypeIcon from '../../../components/ui/IssueTypeIcon';
 import { translate } from '../../../helpers/l10n';
-import { formatFacetStat } from '../utils';
+import { formatFacetStat, Query } from '../utils';
 
-/*::
-type Props = {|
-  facetMode: string,
-  onChange: (changes: { [string]: Array<string> }) => void,
-  onToggle: (property: string) => void,
-  open: boolean,
-  stats?: { [string]: number },
-  types: Array<string>
-|};
-*/
+interface Props {
+  facetMode: string;
+  onChange: (changes: Partial<Query>) => void;
+  onToggle: (property: string) => void;
+  open: boolean;
+  stats: { [x: string]: number } | undefined;
+  statuses: string[];
+}
 
-export default class TypeFacet extends React.PureComponent {
-  /*:: props: Props; */
-
-  property = 'types';
+export default class StatusFacet extends React.PureComponent<Props> {
+  property = 'statuses';
 
   static defaultProps = {
     open: true
   };
 
-  handleItemClick = (itemValue /*: string */) => {
-    const { types } = this.props;
+  handleItemClick = (itemValue: string) => {
+    const { statuses } = this.props;
     const newValue = orderBy(
-      types.includes(itemValue) ? without(types, itemValue) : [...types, itemValue]
+      statuses.includes(itemValue) ? without(statuses, itemValue) : [...statuses, itemValue]
     );
     this.props.onChange({ [this.property]: newValue });
   };
@@ -64,35 +58,40 @@ export default class TypeFacet extends React.PureComponent {
     this.props.onChange({ [this.property]: [] });
   };
 
-  getStat(type /*: string */) /*: ?number */ {
+  getStat(status: string) {
     const { stats } = this.props;
-    return stats ? stats[type] : null;
+    return stats ? stats[status] : undefined;
   }
 
-  renderItem = (type /*: string */) => {
-    const active = this.props.types.includes(type);
-    const stat = this.getStat(type);
+  renderStatus(status: string) {
+    return (
+      <span>
+        <i className={`icon-status-${status.toLowerCase()}`} /> {translate('issue.status', status)}
+      </span>
+    );
+  }
+
+  renderItem = (status: string) => {
+    const active = this.props.statuses.includes(status);
+    const stat = this.getStat(status);
 
     return (
       <FacetItem
         active={active}
         disabled={stat === 0 && !active}
-        key={type}
-        name={
-          <span>
-            <IssueTypeIcon query={type} /> {translate('issue.type', type)}
-          </span>
-        }
+        halfWidth={true}
+        key={status}
+        name={this.renderStatus(status)}
         onClick={this.handleItemClick}
         stat={formatFacetStat(stat, this.props.facetMode)}
-        value={type}
+        value={status}
       />
     );
   };
 
   render() {
-    const types = ['BUG', 'VULNERABILITY', 'CODE_SMELL'];
-    const values = this.props.types.map(type => translate('issue.type', type));
+    const statuses = ['OPEN', 'RESOLVED', 'REOPENED', 'CLOSED', 'CONFIRMED'];
+    const values = this.props.statuses.map(status => translate('issue.status', status));
 
     return (
       <FacetBox property={this.property}>
@@ -104,7 +103,7 @@ export default class TypeFacet extends React.PureComponent {
           values={values}
         />
 
-        {this.props.open && <FacetItemsList>{types.map(this.renderItem)}</FacetItemsList>}
+        {this.props.open && <FacetItemsList>{statuses.map(this.renderItem)}</FacetItemsList>}
       </FacetBox>
     );
   }

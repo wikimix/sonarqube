@@ -17,29 +17,19 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
-// @flow
-import React from 'react';
+import * as React from 'react';
 import ConciseIssueLocationsNavigatorLocation from './ConciseIssueLocationsNavigatorLocation';
-/*:: import type { Issue } from '../../../components/issue/types'; */
+import { Issue } from '../../../app/types';
 
-/*::
-type Props = {|
-  issue: Issue,
-  onLocationSelect: number => void,
-  scroll: HTMLElement => void,
-  selectedFlowIndex: ?number,
-  selectedLocationIndex: ?number
-|};
-*/
+interface Props {
+  issue: Issue;
+  onLocationSelect: (index: number) => void;
+  scroll: (element: Element) => void;
+  selectedFlowIndex: number | undefined;
+  selectedLocationIndex: number | undefined;
+}
 
-export default class ConciseIssueLocationsNavigator extends React.PureComponent {
-  /*:: props: Props; */
-
-  handleClick = (index /*: number */) => (event /*: Event */) => {
-    event.preventDefault();
-    this.props.onLocationSelect(index);
-  };
-
+export default class ConciseIssueLocationsNavigator extends React.PureComponent<Props> {
   render() {
     const { selectedFlowIndex, selectedLocationIndex } = this.props;
     const { flows, secondaryLocations } = this.props.issue;
@@ -57,8 +47,8 @@ export default class ConciseIssueLocationsNavigator extends React.PureComponent 
       <div className="spacer-top">
         {locations.map((location, index) => (
           <ConciseIssueLocationsNavigatorLocation
-            key={index}
             index={index}
+            key={index}
             message={location.msg}
             onClick={this.props.onLocationSelect}
             scroll={this.props.scroll}

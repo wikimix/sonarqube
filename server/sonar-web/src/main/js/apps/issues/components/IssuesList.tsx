@@ -17,32 +17,27 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
-// @flow
-import React from 'react';
+import * as React from 'react';
 import ListItem from './ListItem';
-/*:: import type { Issue } from '../../../components/issue/types'; */
-/*:: import type { Component } from '../utils'; */
+import { Component, Issue } from '../../../app/types';
+import { Query } from '../utils';
 
-/*::
-type Props = {|
-  branch?: string,
-  checked: Array<string>,
-  component?: Component,
-  issues: Array<Issue>,
-  onFilterChange: (changes: {}) => void,
-  onIssueChange: Issue => void,
-  onIssueCheck?: string => void,
-  onIssueClick: string => void,
-  onPopupToggle: (issue: string, popupName: string, open: ?boolean ) => void,
-  openPopup: ?{ issue: string, name: string},
-  organization?: { key: string },
-  selectedIssue: ?Issue
-|};
-*/
+interface Props {
+  branch: string | undefined;
+  checked: Array<string>;
+  component: Component | undefined;
+  issues: Issue[];
+  onFilterChange: (changes: Partial<Query>) => void;
+  onIssueChange: (issue: Issue) => void;
+  onIssueCheck: ((issueKey: string) => void) | undefined;
+  onIssueClick: (issueKey: string) => void;
+  onPopupToggle: (issue: string, popupName: string, open?: boolean) => void;
+  openPopup: { issue: string; name: string } | undefined;
+  organization: { key: string } | undefined;
+  selectedIssue: Issue | undefined;
+}
 
-export default class IssuesList extends React.PureComponent {
-  /*:: props: Props; */
-
+export default class IssuesList extends React.PureComponent<Props> {
   render() {
     const { branch, checked, component, issues, openPopup, selectedIssue } = this.props;
 
@@ -53,16 +48,16 @@ export default class IssuesList extends React.PureComponent {
             branch={branch}
             checked={checked.includes(issue.key)}
             component={component}
-            key={issue.key}
             issue={issue}
+            key={issue.key}
             onChange={this.props.onIssueChange}
             onCheck={this.props.onIssueCheck}
             onClick={this.props.onIssueClick}
             onFilterChange={this.props.onFilterChange}
             onPopupToggle={this.props.onPopupToggle}
-            openPopup={openPopup && openPopup.issue === issue.key ? openPopup.name : null}
+            openPopup={openPopup && openPopup.issue === issue.key ? openPopup.name : undefined}
             organization={this.props.organization}
-            previousIssue={index > 0 ? issues[index - 1] : null}
+            previousIssue={index > 0 ? issues[index - 1] : undefined}
             selected={selectedIssue != null && selectedIssue.key === issue.key}
           />
         ))}
