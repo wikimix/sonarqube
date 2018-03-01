@@ -17,11 +17,24 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
-import React from 'react';
+import * as React from 'react';
 import { shallow } from 'enzyme';
 import ConciseIssuesList from '../ConciseIssuesList';
+import { Issue } from '../../../../app/types';
 
 it('should render', () => {
-  const issues = [{ key: 'foo' }, { key: 'bar' }];
-  expect(shallow(<ConciseIssuesList issues={issues} />)).toMatchSnapshot();
+  const issues = [{ key: 'foo' }, { key: 'bar' }] as Issue[];
+  expect(
+    shallow(
+      <ConciseIssuesList
+        issues={issues}
+        onFlowSelect={jest.fn()}
+        onIssueSelect={jest.fn()}
+        onLocationSelect={jest.fn()}
+        selected={undefined}
+        selectedFlowIndex={undefined}
+        selectedLocationIndex={undefined}
+      />
+    )
+  ).toMatchSnapshot();
 });

@@ -17,29 +17,26 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
-// @flow
-import React from 'react';
-import classNames from 'classnames';
+import * as React from 'react';
+import * as classNames from 'classnames';
 import Tooltip from '../../../components/controls/Tooltip';
 import { translate } from '../../../helpers/l10n';
 
-/*::
-type Props = {|
-  className?: string,
-  onClick: () => void
-|};
-*/
+interface Props {
+  className?: string;
+  onClick: () => void;
+}
 
 /* eslint-disable max-len */
 const icon = (
-  <svg width="18" height="24" viewBox="0 0 18 24">
+  <svg height="24" viewBox="0 0 18 24" width="18">
     <path d="M16.6454 8.1084c-.3-.5-.9-.7-1.4-.4-.5.3-.7.9-.4 1.4.9 1.6 1.1 3.4.6 5.1-.5 1.7-1.7 3.2-3.2 4-3.3 1.8-7.4.6-9.1-2.7-1.8-3.1-.8-6.9 2.1-8.8v3.3h2v-7h-7v2h3.9c-3.7 2.5-5 7.5-2.8 11.4 1.6 3 4.6 4.6 7.7 4.6 1.4 0 2.8-.3 4.2-1.1 2-1.1 3.5-3 4.2-5.2.6-2.2.3-4.6-.8-6.6z" />
   </svg>
 );
 /* eslint-enable max-len */
 
-export default function ReloadButton(props /*: Props */) {
-  const handleClick = (event /*: Event */) => {
+export default function ReloadButton(props: Props) {
+  const handleClick = (event: React.MouseEvent<HTMLAnchorElement>) => {
     event.preventDefault();
     props.onClick();
   };

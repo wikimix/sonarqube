@@ -667,7 +667,7 @@ export default class App extends React.PureComponent<Props, State> {
     this.setState({ bulkChange: null });
   };
 
-  handleBulkChangeClick = (event: React.MouseEvent<HTMLAnchorElement>) => {
+  handleBulkChangeClick = (event: React.MouseEvent<HTMLAnchorElement | HTMLButtonElement>) => {
     event.preventDefault();
     event.currentTarget.blur();
     this.openBulkChange('all');

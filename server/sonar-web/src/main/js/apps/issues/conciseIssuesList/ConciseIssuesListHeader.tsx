@@ -17,24 +17,21 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
-// @flow
-import React from 'react';
+import * as React from 'react';
 import BackButton from './BackButton';
 import ReloadButton from '../components/ReloadButton';
 import IssuesCounter from '../components/IssuesCounter';
-/*:: import type { Paging } from '../utils'; */
+import { Paging } from '../../../app/types';
 
-/*::
-type Props = {|
-  loading: boolean,
-  onBackClick: () => void,
-  onReload: () => void,
-  paging?: Paging,
-  selectedIndex: ?number
-|};
-*/
+interface Props {
+  loading: boolean;
+  onBackClick: () => void;
+  onReload: () => void;
+  paging?: Paging;
+  selectedIndex?: number;
+}
 
-export default function ConciseIssuesListHeader(props /*: Props */) {
+export default function ConciseIssuesListHeader(props: Props) {
   const { paging, selectedIndex } = props;
 
   return (

@@ -3,7 +3,6 @@
 exports[`does not show current 1`] = `
 <PageCounter
   className="spacer-left flash flash-heavy"
-  current={null}
   label="issues.issues"
   total={987654321}
 />

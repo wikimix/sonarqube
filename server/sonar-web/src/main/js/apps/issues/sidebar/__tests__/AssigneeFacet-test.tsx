@@ -17,21 +17,23 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
-import React from 'react';
+import * as React from 'react';
 import { shallow } from 'enzyme';
-import AssigneeFacet from '../AssigneeFacet';
+import AssigneeFacet, { Props } from '../AssigneeFacet';
 
 jest.mock('../../../../store/rootReducer', () => ({}));
 
-const renderAssigneeFacet = (props /*: ?{} */) =>
+const renderAssigneeFacet = (props?: Partial<Props>) =>
   shallow(
     <AssigneeFacet
       assigned={true}
       assignees={[]}
+      component={undefined}
       facetMode="count"
       onChange={jest.fn()}
       onToggle={jest.fn()}
       open={true}
+      organization={undefined}
       referencedUsers={{ foo: { avatar: 'avatart-foo', name: 'name-foo' } }}
       stats={{ '': 5, foo: 13, bar: 7 }}
       {...props}
@@ -43,7 +45,7 @@ it('should render', () => {
 });
 
 it('should render without stats', () => {
-  expect(renderAssigneeFacet({ stats: null })).toMatchSnapshot();
+  expect(renderAssigneeFacet({ stats: undefined })).toMatchSnapshot();
 });
 
 it('should select unassigned', () => {
@@ -57,7 +59,7 @@ it('should select user', () => {
 it('should render footer select option', () => {
   const wrapper = renderAssigneeFacet();
   expect(
-    wrapper.instance().renderOption({ avatar: 'avatar-foo', label: 'name-foo' })
+    (wrapper.instance() as AssigneeFacet).renderOption({ avatar: 'avatar-foo', label: 'name-foo' })
   ).toMatchSnapshot();
 });
 
@@ -67,7 +69,7 @@ it('should call onChange', () => {
   const itemOnClick = wrapper
     .find('FacetItem')
     .first()
-    .prop('onClick');
+    .prop<Function>('onClick');
 
   itemOnClick('');
   expect(onChange).lastCalledWith({ assigned: false, assignees: [] });
@@ -82,7 +84,7 @@ it('should call onChange', () => {
 it('should call onToggle', () => {
   const onToggle = jest.fn();
   const wrapper = renderAssigneeFacet({ onToggle });
-  const headerOnClick = wrapper.find('FacetHeader').prop('onClick');
+  const headerOnClick = wrapper.find('FacetHeader').prop<Function>('onClick');
 
   headerOnClick();
   expect(onToggle).lastCalledWith('assignees');
@@ -91,7 +93,7 @@ it('should call onToggle', () => {
 it('should handle footer callbacks', () => {
   const onChange = jest.fn();
   const wrapper = renderAssigneeFacet({ assignees: ['foo'], onChange });
-  const onSelect = wrapper.find('FacetFooter').prop('onSelect');
+  const onSelect = wrapper.find('FacetFooter').prop<Function>('onSelect');
 
   onSelect({ value: 'qux' });
   expect(onChange).lastCalledWith({ assigned: true, assignees: ['foo', 'qux'] });

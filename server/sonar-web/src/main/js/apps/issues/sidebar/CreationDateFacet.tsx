@@ -164,14 +164,14 @@ export default class CreationDateFacet extends React.PureComponent<Props> {
         endDate = parseDate(periods[index + 1]);
         endDate.setDate(endDate.getDate() - 1);
       } else {
-        endDate = createdBefore && parseDate(createdBefore);
+        endDate = createdBefore ? parseDate(createdBefore) : undefined;
       }
 
       let tooltip =
         formatMeasure(stats[start], 'SHORT_INT') +
         '<br/>' +
         formatDate(startDate, longFormatterOption);
-      const tooltipEndDate = endDate || Date.now();
+      const tooltipEndDate = endDate || new Date();
       if (!isSameDay(tooltipEndDate, startDate)) {
         tooltip += ' – ' + formatDate(tooltipEndDate, longFormatterOption);
       }
@@ -245,10 +245,6 @@ export default class CreationDateFacet extends React.PureComponent<Props> {
 
   renderPredefinedPeriods() {
     const { component, createdInLast, sinceLeakPeriod } = this.props;
-    if (component != null && component.branch != null) {
-      // FIXME handle long-living branches
-      return null;
-    }
     return (
       <div className="spacer-top issues-predefined-periods">
         <FacetItem

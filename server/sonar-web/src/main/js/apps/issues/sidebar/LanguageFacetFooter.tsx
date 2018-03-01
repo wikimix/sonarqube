@@ -17,28 +17,19 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
-// @flow
-import React from 'react';
+import * as React from 'react';
 import { connect } from 'react-redux';
 import Select from '../../../components/controls/Select';
 import { translate } from '../../../helpers/l10n';
 import { getLanguages } from '../../../store/rootReducer';
 
-/*::
-type Option = { label: string, value: string };
-*/
+interface Props {
+  languages: Array<{ key: string; name: string }>;
+  onSelect: (value: string) => void;
+}
 
-/*::
-type Props = {|
-  languages: Array<{ key: string, name: string }>,
-  onSelect: (value: string) => void
-|};
-*/
-
-class LanguageFacetFooter extends React.PureComponent {
-  /*:: props: Props; */
-
-  handleChange = (option /*: Option */) => {
+class LanguageFacetFooter extends React.PureComponent<Props> {
+  handleChange = (option: { value: string }) => {
     this.props.onSelect(option.value);
   };
 
@@ -64,7 +55,7 @@ class LanguageFacetFooter extends React.PureComponent {
   }
 }
 
-const mapStateToProps = state => ({
+const mapStateToProps = (state: any) => ({
   languages: Object.values(getLanguages(state))
 });
 

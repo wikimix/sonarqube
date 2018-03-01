@@ -17,8 +17,7 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
-// @flow
-import React from 'react';
+import * as React from 'react';
 import { sortBy, uniq, without } from 'lodash';
 import Avatar from '../../../components/ui/Avatar';
 import FacetBox from '../../../components/facet/FacetBox';
@@ -26,35 +25,31 @@ import FacetHeader from '../../../components/facet/FacetHeader';
 import FacetItem from '../../../components/facet/FacetItem';
 import FacetItemsList from '../../../components/facet/FacetItemsList';
 import FacetFooter from '../../../components/facet/FacetFooter';
-import { searchAssignees, formatFacetStat } from '../utils';
+import { searchAssignees, formatFacetStat, Query, ReferencedUser } from '../utils';
 import { translate } from '../../../helpers/l10n';
-/*:: import type { ReferencedUser, Component } from '../utils'; */
+import { Component } from '../../../app/types';
 
-/*::
-type Props = {|
-  assigned: boolean,
-  assignees: Array<string>,
-  component?: Component,
-  facetMode: string,
-  onChange: (changes: {}) => void,
-  onToggle: (property: string) => void,
-  open: boolean,
-  organization?: { key: string },
-  stats?: { [string]: number },
-  referencedUsers: { [string]: ReferencedUser }
-|};
-*/
+export interface Props {
+  assigned: boolean;
+  assignees: string[];
+  component: Component | undefined;
+  facetMode: string;
+  onChange: (changes: Partial<Query>) => void;
+  onToggle: (property: string) => void;
+  open: boolean;
+  organization: { key: string } | undefined;
+  stats: { [x: string]: number } | undefined;
+  referencedUsers: { [login: string]: ReferencedUser };
+}
 
-export default class AssigneeFacet extends React.PureComponent {
-  /*:: props: Props; */
-
+export default class AssigneeFacet extends React.PureComponent<Props> {
   property = 'assignees';
 
   static defaultProps = {
     open: true
   };
 
-  handleItemClick = (itemValue /*: string */) => {
+  handleItemClick = (itemValue: string) => {
     if (itemValue === '') {
       // unassigned
       this.props.onChange({ assigned: !this.props.assigned, assignees: [] });
@@ -76,7 +71,7 @@ export default class AssigneeFacet extends React.PureComponent {
     this.props.onChange({ assigned: true, assignees: [] });
   };
 
-  handleSearch = (query /*: string */) => {
+  handleSearch = (query: string) => {
     let organization = this.props.component && this.props.component.organization;
     if (this.props.organization && !organization) {
       organization = this.props.organization.key;
@@ -84,16 +79,16 @@ export default class AssigneeFacet extends React.PureComponent {
     return searchAssignees(query, organization);
   };
 
-  handleSelect = (option /*: { value: string } */) => {
+  handleSelect = (option: { value: string }) => {
     const { assignees } = this.props;
     this.props.onChange({ assigned: true, [this.property]: uniq([...assignees, option.value]) });
   };
 
-  isAssigneeActive(assignee /*: string */) {
+  isAssigneeActive(assignee: string) {
     return assignee === '' ? !this.props.assigned : this.props.assignees.includes(assignee);
   }
 
-  getAssigneeName(assignee /*: string */) /*: React.Element<*> | string */ {
+  getAssigneeName(assignee: string) {
     if (assignee === '') {
       return translate('unassigned');
     } else {
@@ -116,9 +111,9 @@ export default class AssigneeFacet extends React.PureComponent {
     }
   }
 
-  getStat(assignee /*: string */) /*: ?number */ {
+  getStat(assignee: string) {
     const { stats } = this.props;
-    return stats ? stats[assignee] : null;
+    return stats ? stats[assignee] : undefined;
   }
 
   getValues() {
@@ -132,7 +127,7 @@ export default class AssigneeFacet extends React.PureComponent {
     return values;
   }
 
-  renderOption = (option /*: { avatar: string, label: string } */) => {
+  renderOption = (option: { avatar: string; label: string }) => {
     return (
       <span>
         {option.avatar != null && (

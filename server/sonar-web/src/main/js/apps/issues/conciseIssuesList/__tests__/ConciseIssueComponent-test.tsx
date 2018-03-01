@@ -17,11 +17,12 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
-// @flow
-import React from 'react';
+import * as React from 'react';
 import { shallow } from 'enzyme';
-import ConciseIssueLocationBadge from '../ConciseIssueLocationBadge';
+import ConciseIssueComponent from '../ConciseIssueComponent';
 
 it('should render', () => {
-  expect(shallow(<ConciseIssueLocationBadge count={7} />)).toMatchSnapshot();
+  expect(
+    shallow(<ConciseIssueComponent path="src/app/folder/sub-folder/long-folder/name/app.js" />)
+  ).toMatchSnapshot();
 });

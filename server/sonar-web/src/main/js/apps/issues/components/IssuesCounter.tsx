@@ -17,25 +17,23 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
-import React from 'react';
-import { shallow } from 'enzyme';
-import ConciseIssue from '../ConciseIssue';
+import * as React from 'react';
+import PageCounter from '../../../components/common/PageCounter';
+import { translate } from '../../../helpers/l10n';
 
-it('should render', () => {
-  expect(
-    shallow(<ConciseIssue issue={{}} onSelect={jest.fn()} selected={false} />)
-  ).toMatchSnapshot();
-});
+interface Props {
+  className?: string;
+  current?: number;
+  total: number;
+}
 
-it('should not render component', () => {
-  expect(
-    shallow(
-      <ConciseIssue
-        issue={{ component: 'foo' }}
-        onSelect={jest.fn()}
-        previousIssue={{ component: 'foo' }}
-        selected={false}
-      />
-    ).find('ConciseIssueComponent')
-  ).toHaveLength(0);
-});
+export default function IssuesCounter(props: Props) {
+  return (
+    <PageCounter
+      className="spacer-left flash flash-heavy"
+      current={props.current}
+      label={translate('issues.issues')}
+      total={props.total}
+    />
+  );
+}

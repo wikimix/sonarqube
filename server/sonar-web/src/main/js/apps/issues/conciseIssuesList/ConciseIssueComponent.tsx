@@ -17,15 +17,15 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
-// @flow
-import React from 'react';
-import { shallow } from 'enzyme';
-import IssuesCounter from '../IssuesCounter';
+import * as React from 'react';
+import { collapsePath } from '../../../helpers/path';
 
-it('formats numbers', () => {
-  expect(shallow(<IssuesCounter current={1234} total={987654321} />)).toMatchSnapshot();
-});
+interface Props {
+  path: string;
+}
 
-it('does not show current', () => {
-  expect(shallow(<IssuesCounter current={null} total={987654321} />)).toMatchSnapshot();
-});
+export default function ConciseIssueComponent(props: Props) {
+  return (
+    <div className="concise-issue-component note text-ellipsis">{collapsePath(props.path, 20)}</div>
+  );
+}

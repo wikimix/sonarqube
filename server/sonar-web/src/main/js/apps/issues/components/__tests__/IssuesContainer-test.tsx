@@ -17,33 +17,14 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
-// @flow
-import React from 'react';
-import Tooltip from '../../../components/controls/Tooltip';
-import LocationIndex from '../../../components/common/LocationIndex';
-import { translateWithParameters } from '../../../helpers/l10n';
-import { formatMeasure } from '../../../helpers/measures';
+import * as React from 'react';
+import { shallow } from 'enzyme';
+import IssuesCounter from '../IssuesCounter';
 
-/*::
-type Props = {|
-  count: number,
-  onClick?: () => void,
-  selected?: boolean
-|};
-*/
+it('formats numbers', () => {
+  expect(shallow(<IssuesCounter current={1234} total={987654321} />)).toMatchSnapshot();
+});
 
-export default function ConciseIssueLocationBadge(props /*: Props */) {
-  return (
-    <Tooltip
-      mouseEnterDelay={0.5}
-      overlay={translateWithParameters(
-        'issue.this_issue_involves_x_code_locations',
-        formatMeasure(props.count)
-      )}>
-      <LocationIndex onClick={props.onClick} selected={props.selected}>
-        {'+'}
-        {props.count}
-      </LocationIndex>
-    </Tooltip>
-  );
-}
+it('does not show current', () => {
+  expect(shallow(<IssuesCounter current={undefined} total={987654321} />)).toMatchSnapshot();
+});

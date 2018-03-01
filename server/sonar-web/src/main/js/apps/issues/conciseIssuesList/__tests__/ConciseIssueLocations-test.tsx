@@ -17,36 +17,71 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
-import React from 'react';
+import * as React from 'react';
 import { shallow } from 'enzyme';
 import ConciseIssueLocations from '../ConciseIssueLocations';
 
 const textRange = { startLine: 1, startOffset: 1, endLine: 1, endOffset: 1 };
 
+const baseIssue = {
+  component: '',
+  componentLongName: '',
+  componentQualifier: '',
+  componentUuid: '',
+  creationDate: '',
+  key: '',
+  message: '',
+  organization: '',
+  project: '',
+  projectName: '',
+  projectOrganization: '',
+  projectUuid: '',
+  rule: '',
+  ruleName: '',
+  severity: '',
+  status: '',
+  type: '',
+  secondaryLocations: [],
+  flows: []
+};
+
 it('should render secondary locations', () => {
   const issue = {
-    secondaryLocations: [{ msg: '', textRange }, { msg: '', textRange }, { msg: '', textRange }],
-    flows: []
+    ...baseIssue,
+    secondaryLocations: [{ msg: '', textRange }, { msg: '', textRange }, { msg: '', textRange }]
   };
-  expect(shallow(<ConciseIssueLocations issue={issue} />)).toMatchSnapshot();
+  expect(
+    shallow(
+      <ConciseIssueLocations issue={issue} onFlowSelect={jest.fn()} selectedFlowIndex={undefined} />
+    )
+  ).toMatchSnapshot();
 });
 
 it('should render one flow', () => {
   const issue = {
+    ...baseIssue,
     secondaryLocations: [],
     flows: [[{ msg: '', textRange }, { msg: '', textRange }, { msg: '', textRange }]]
   };
-  expect(shallow(<ConciseIssueLocations issue={issue} />)).toMatchSnapshot();
+  expect(
+    shallow(
+      <ConciseIssueLocations issue={issue} onFlowSelect={jest.fn()} selectedFlowIndex={undefined} />
+    )
+  ).toMatchSnapshot();
 });
 
 it('should render several flows', () => {
   const issue = {
-    secondaryLocations: [],
+    ...baseIssue,
     flows: [
       [{ msg: '', textRange }, { msg: '', textRange }, { msg: '', textRange }],
       [{ msg: '', textRange }, { msg: '', textRange }],
       [{ msg: '', textRange }, { msg: '', textRange }, { msg: '', textRange }]
     ]
   };
-  expect(shallow(<ConciseIssueLocations issue={issue} />)).toMatchSnapshot();
+  expect(
+    shallow(
+      <ConciseIssueLocations issue={issue} onFlowSelect={jest.fn()} selectedFlowIndex={undefined} />
+    )
+  ).toMatchSnapshot();
 });

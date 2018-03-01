@@ -17,35 +17,59 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
-import React from 'react';
+import * as React from 'react';
 import { shallow } from 'enzyme';
-import Sidebar from '../Sidebar';
+import Sidebar, { Props } from '../Sidebar';
+import { Query } from '../../utils';
 
 jest.mock('../../../../store/rootReducer', () => ({}));
 
-const renderSidebar = props =>
-  shallow(<Sidebar facets={{}} myIssues={false} openFacets={{}} query={{}} {...props} />)
+const renderSidebar = (props?: Partial<Props>) =>
+  shallow(
+    <Sidebar
+      component={undefined}
+      facets={{}}
+      myIssues={false}
+      onFacetToggle={jest.fn()}
+      onFilterChange={jest.fn()}
+      openFacets={{}}
+      organization={undefined}
+      query={{} as Query}
+      referencedComponents={{}}
+      referencedLanguages={{}}
+      referencedRules={{}}
+      referencedUsers={{}}
+      {...props}
+    />
+  )
     .children()
     .map(node => node.name());
+
+const component = {
+  breadcrumbs: [],
+  name: 'foo',
+  key: 'foo',
+  organization: 'org'
+};
 
 it('should render facets for global page', () => {
   expect(renderSidebar()).toMatchSnapshot();
 });
 
 it('should render facets for project', () => {
-  expect(renderSidebar({ component: { qualifier: 'TRK' } })).toMatchSnapshot();
+  expect(renderSidebar({ component: { ...component, qualifier: 'TRK' } })).toMatchSnapshot();
 });
 
 it('should render facets for module', () => {
-  expect(renderSidebar({ component: { qualifier: 'BRC' } })).toMatchSnapshot();
+  expect(renderSidebar({ component: { ...component, qualifier: 'BRC' } })).toMatchSnapshot();
 });
 
 it('should render facets for directory', () => {
-  expect(renderSidebar({ component: { qualifier: 'DIR' } })).toMatchSnapshot();
+  expect(renderSidebar({ component: { ...component, qualifier: 'DIR' } })).toMatchSnapshot();
 });
 
 it('should render facets for developer', () => {
-  expect(renderSidebar({ component: { qualifier: 'DEV' } })).toMatchSnapshot();
+  expect(renderSidebar({ component: { ...component, qualifier: 'DEV' } })).toMatchSnapshot();
 });
 
 it('should render facets when my issues are selected', () => {

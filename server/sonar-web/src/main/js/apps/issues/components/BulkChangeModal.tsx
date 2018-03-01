@@ -17,8 +17,7 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
-// @flow
-import React from 'react';
+import * as React from 'react';
 import { pickBy, sortBy } from 'lodash';
 import SearchSelect from '../../../components/controls/SearchSelect';
 import Checkbox from '../../../components/controls/Checkbox';
@@ -33,52 +32,44 @@ import throwGlobalError from '../../../app/utils/throwGlobalError';
 import { searchIssueTags, bulkChangeIssues } from '../../../api/issues';
 import { translate, translateWithParameters } from '../../../helpers/l10n';
 import { searchAssignees } from '../utils';
-/*:: import type { Paging, Component, CurrentUser } from '../utils'; */
-/*:: import type { Issue } from '../../../components/issue/types'; */
+import { Component, CurrentUser, Issue, Paging, isLoggedIn } from '../../../app/types';
 
-/*::
-type Props = {|
-  component?: Component,
-  currentUser: CurrentUser,
-  fetchIssues: ({}) => Promise<*>,
-  onClose: () => void,
-  onDone: () => void,
-  organization?: { key: string }
-|};
-*/
+interface Props {
+  component: Component | undefined;
+  currentUser: CurrentUser;
+  fetchIssues: (x: {}) => Promise<{ issues: Issue[]; paging: Paging }>;
+  onClose: () => void;
+  onDone: () => void;
+  organization?: { key: string };
+}
 
-/*::
-type State = {|
-  initialTags: Array<{ label:string, value: string }>,
-  issues: Array<Issue>,
+interface State {
+  initialTags: Array<{ label: string; value: string }>;
+  issues: Issue[];
   // used for initial loading of issues
-  loading: boolean,
-  paging?: Paging,
+  loading: boolean;
+  paging?: Paging;
   // used when submitting a form
-  submitting: boolean,
+  submitting: boolean;
 
   // form fields
-  addTags?: Array<{ label: string, value: string }>,
-  assignee?: { avatar?: string, label: string, value: string },
-  comment?: string,
-  notifications?: boolean,
-  organization?: string,
-  removeTags?: Array<{ label: string, value: string }>,
-  severity?: string,
-  transition?: string,
-  type?: string
-|};
-*/
+  addTags?: Array<{ label: string; value: string }>;
+  assignee?: string;
+  comment?: string;
+  notifications?: boolean;
+  organization?: string;
+  removeTags?: Array<{ label: string; value: string }>;
+  severity?: string;
+  transition?: string;
+  type?: string;
 
-const hasAction = (action /*: string */) => (issue /*: Issue */) =>
-  issue.actions && issue.actions.includes(action);
+  [x: string]: any;
+}
 
-export default class BulkChangeModal extends React.PureComponent {
-  /*:: mounted: boolean; */
-  /*:: props: Props; */
-  /*:: state: State; */
+export default class BulkChangeModal extends React.PureComponent<Props, State> {
+  mounted = false;
 
-  constructor(props /*: Props */) {
+  constructor(props: Props) {
     super(props);
     let organization = props.component && props.component.organization;
     if (props.organization && !organization) {
@@ -119,7 +110,7 @@ export default class BulkChangeModal extends React.PureComponent {
     const { issues } = this.state;
     const options = [];
 
-    if (currentUser.isLoggedIn) {
+    if (isLoggedIn(currentUser)) {
       const canBeAssignedToMe =
         issues.filter(issue => issue.assignee !== currentUser.login).length > 0;
       if (canBeAssignedToMe) {
@@ -139,33 +130,31 @@ export default class BulkChangeModal extends React.PureComponent {
     return options;
   };
 
-  handleCloseClick = (e /*: Event & { target: HTMLElement } */) => {
-    e.preventDefault();
-    e.target.blur();
+  handleCloseClick = (event: React.MouseEvent<HTMLAnchorElement>) => {
+    event.preventDefault();
+    event.currentTarget.blur();
     this.props.onClose();
   };
 
-  handleAssigneeSearch = (query /*: string */) => {
+  handleAssigneeSearch = (query: string) => {
     return searchAssignees(query, this.state.organization);
   };
 
-  handleAssigneeSelect = (assignee /*: { avatar?: string, label: string, value: string } */) => {
-    this.setState({ assignee });
+  handleAssigneeSelect = ({ value }: { value: string }) => {
+    this.setState({ assignee: value });
   };
 
-  handleTagsSearch = (query /*: string */) => {
+  handleTagsSearch = (query: string) => {
     return searchIssueTags({ organization: this.state.organization, q: query }).then(tags =>
       tags.map(tag => ({ label: tag, value: tag }))
     );
   };
 
-  handleTagsSelect = (field /*: string */) => (
-    options /*: Array<{ label: string, value: string }> */
-  ) => {
+  handleTagsSelect = (field: string) => (options: Array<{ label: string; value: string }>) => {
     this.setState({ [field]: options });
   };
 
-  handleFieldCheck = (field /*: string */) => (checked /*: boolean */) => {
+  handleFieldCheck = (field: string) => (checked: boolean) => {
     if (!checked) {
       this.setState({ [field]: undefined });
     } else if (field === 'notifications') {
@@ -173,21 +162,23 @@ export default class BulkChangeModal extends React.PureComponent {
     }
   };
 
-  handleFieldChange = (field /*: string */) => (event /*: { target: HTMLInputElement } */) => {
-    this.setState({ [field]: event.target.value });
+  handleFieldChange = (field: string) => (
+    event: React.SyntheticEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    this.setState({ [field]: event.currentTarget.value });
   };
 
-  handleSelectFieldChange = (field /*: string */) => ({ value } /*: { value: string } */) => {
+  handleSelectFieldChange = (field: string) => ({ value }: { value: string }) => {
     this.setState({ [field]: value });
   };
 
-  handleSubmit = (e /*: Event */) => {
-    e.preventDefault();
+  handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
     /* eslint-disable camelcase */
     const query = pickBy(
       {
         add_tags: this.state.addTags && this.state.addTags.map(t => t.value).join(),
-        assign: this.state.assignee && this.state.assignee.value,
+        assign: this.state.assignee,
         comment: this.state.comment,
         do_transition: this.state.transition,
         remove_tags: this.state.removeTags && this.state.removeTags.map(t => t.value).join(),
@@ -207,17 +198,15 @@ export default class BulkChangeModal extends React.PureComponent {
         this.setState({ submitting: false });
         this.props.onDone();
       },
-      (error /*: Error */) => {
+      error => {
         this.setState({ submitting: false });
         throwGlobalError(error);
       }
     );
   };
 
-  getAvailableTransitions(
-    issues /*: Array<Issue> */
-  ) /*: Array<{ transition: string, count: number }> */ {
-    const transitions = {};
+  getAvailableTransitions(issues: Issue[]) {
+    const transitions: { [x: string]: number } = {};
     issues.forEach(issue => {
       if (issue.transitions) {
         issue.transitions.forEach(t => {
@@ -236,7 +225,7 @@ export default class BulkChangeModal extends React.PureComponent {
   }
 
   renderCancelButton = () => (
-    <a id="bulk-change-cancel" href="#" onClick={this.handleCloseClick}>
+    <a href="#" id="bulk-change-cancel" onClick={this.handleCloseClick}>
       {translate('cancel')}
     </a>
   );
@@ -255,21 +244,21 @@ export default class BulkChangeModal extends React.PureComponent {
     </div>
   );
 
-  renderCheckbox = (field /*: string */) => (
+  renderCheckbox = (field: string) => (
     <Checkbox checked={this.state[field] != null} onCheck={this.handleFieldCheck(field)} />
   );
 
-  renderAffected = (affected /*: number */) => (
+  renderAffected = (affected: number) => (
     <div className="pull-right note">
       ({translateWithParameters('issue_bulk_change.x_issues', affected)})
     </div>
   );
 
   renderField = (
-    field /*: string */,
-    label /*: string */,
-    affected /*: ?number */,
-    input /*: Object */
+    field: string,
+    label: string,
+    affected: number | undefined,
+    input: React.ReactNode
   ) => (
     <div className="modal-field" id={`issues-bulk-change-${field}`}>
       <label htmlFor={field}>{translate(label)}</label>
@@ -279,7 +268,7 @@ export default class BulkChangeModal extends React.PureComponent {
     </div>
   );
 
-  renderAssigneeOption = (option /*: { avatar?: string, email?: string, label: string } */) => {
+  renderAssigneeOption = (option: { avatar?: string; email?: string; label: string }) => {
     return (
       <span>
         {option.avatar != null && (
@@ -291,7 +280,7 @@ export default class BulkChangeModal extends React.PureComponent {
   };
 
   renderAssigneeField = () => {
-    const affected /*: number */ = this.state.issues.filter(hasAction('assign')).length;
+    const affected = this.state.issues.filter(hasAction('assign')).length;
 
     if (affected === 0) {
       return null;
@@ -312,7 +301,7 @@ export default class BulkChangeModal extends React.PureComponent {
   };
 
   renderTypeField = () => {
-    const affected /*: number */ = this.state.issues.filter(hasAction('set_type')).length;
+    const affected = this.state.issues.filter(hasAction('set_type')).length;
 
     if (affected === 0) {
       return null;
@@ -321,7 +310,7 @@ export default class BulkChangeModal extends React.PureComponent {
     const types = ['BUG', 'VULNERABILITY', 'CODE_SMELL'];
     const options = types.map(type => ({ label: translate('issue.type', type), value: type }));
 
-    const optionRenderer = (option /*: { label: string, value: string } */) => (
+    const optionRenderer = (option: { label: string; value: string }) => (
       <span>
         <IssueTypeIcon className="little-spacer-right" query={option.value} />
         {option.label}
@@ -331,7 +320,6 @@ export default class BulkChangeModal extends React.PureComponent {
     const input = (
       <Select
         clearable={false}
-        id="type"
         onChange={this.handleSelectFieldChange('type')}
         optionRenderer={optionRenderer}
         options={options}
@@ -345,7 +333,7 @@ export default class BulkChangeModal extends React.PureComponent {
   };
 
   renderSeverityField = () => {
-    const affected /*: number */ = this.state.issues.filter(hasAction('set_severity')).length;
+    const affected = this.state.issues.filter(hasAction('set_severity')).length;
 
     if (affected === 0) {
       return null;
@@ -360,22 +348,21 @@ export default class BulkChangeModal extends React.PureComponent {
     const input = (
       <Select
         clearable={false}
-        id="severity"
         onChange={this.handleSelectFieldChange('severity')}
-        optionRenderer={option => <SeverityHelper severity={option.value} />}
+        optionRenderer={(option: { value: string }) => <SeverityHelper severity={option.value} />}
         options={options}
         searchable={false}
         value={this.state.severity}
-        valueRenderer={option => <SeverityHelper severity={option.value} />}
+        valueRenderer={(option: { value: string }) => <SeverityHelper severity={option.value} />}
       />
     );
 
     return this.renderField('severity', 'issue.set_severity', affected, input);
   };
 
-  renderTagsField = (field /*: string */, label /*: string */, allowCreate /*: boolean */) => {
+  renderTagsField = (field: string, label: string, allowCreate: boolean) => {
     const { initialTags } = this.state;
-    const affected /*: number */ = this.state.issues.filter(hasAction('set_tags')).length;
+    const affected = this.state.issues.filter(hasAction('set_tags')).length;
 
     if (initialTags == null || affected === 0) {
       return null;
@@ -385,7 +372,6 @@ export default class BulkChangeModal extends React.PureComponent {
       <SearchSelect
         canCreate={allowCreate}
         defaultOptions={this.state.initialTags}
-        id={field}
         minimumQueryLength={0}
         multi={true}
         onMultiSelect={this.handleTagsSelect(field)}
@@ -434,7 +420,7 @@ export default class BulkChangeModal extends React.PureComponent {
   };
 
   renderCommentField = () => {
-    const affected /*: number */ = this.state.issues.filter(hasAction('comment')).length;
+    const affected = this.state.issues.filter(hasAction('comment')).length;
 
     if (affected === 0) {
       return null;
@@ -452,7 +438,7 @@ export default class BulkChangeModal extends React.PureComponent {
           <textarea
             id="comment"
             onChange={this.handleFieldChange('comment')}
-            rows="4"
+            rows={4}
             style={{ width: '100%' }}
             value={this.state.comment || ''}
           />
@@ -520,6 +506,10 @@ export default class BulkChangeModal extends React.PureComponent {
   }
 }
 
-function promptCreateTag(label /*: string */) {
+function hasAction(action: string) {
+  return (issue: Issue) => issue.actions && issue.actions.includes(action);
+}
+
+function promptCreateTag(label: string) {
   return `+ ${label}`;
 }

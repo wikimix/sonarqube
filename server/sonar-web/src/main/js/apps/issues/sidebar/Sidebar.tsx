@@ -36,7 +36,7 @@ import TypeFacet from './TypeFacet';
 import { Query, Facet, ReferencedComponent, ReferencedUser, ReferencedLanguage } from '../utils';
 import { Component } from '../../../app/types';
 
-interface Props {
+export interface Props {
   component: Component | undefined;
   facets: { [facet: string]: Facet };
   myIssues: boolean;
@@ -180,34 +180,34 @@ export default class Sidebar extends React.PureComponent<Props> {
         )}
         {!this.props.myIssues && (
           <AssigneeFacet
+            assigned={query.assigned}
+            assignees={query.assignees}
             component={component}
             facetMode={query.facetMode}
             onChange={this.props.onFilterChange}
             onToggle={this.props.onFacetToggle}
             open={!!openFacets.assignees}
             organization={this.props.organization}
-            assigned={query.assigned}
-            assignees={query.assignees}
             referencedUsers={this.props.referencedUsers}
             stats={facets.assignees}
           />
         )}
         {displayAuthorFacet && (
           <AuthorFacet
+            authors={query.authors}
             facetMode={query.facetMode}
             onChange={this.props.onFilterChange}
             onToggle={this.props.onFacetToggle}
             open={!!openFacets.authors}
-            authors={query.authors}
             stats={facets.authors}
           />
         )}
         <LanguageFacet
           facetMode={query.facetMode}
+          languages={query.languages}
           onChange={this.props.onFilterChange}
           onToggle={this.props.onFacetToggle}
           open={!!openFacets.languages}
-          languages={query.languages}
           referencedLanguages={this.props.referencedLanguages}
           stats={facets.languages}
         />

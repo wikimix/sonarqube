@@ -17,43 +17,35 @@
  * along with this program; if not, write to the Free Software Foundation,
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
-// @flow
-import React from 'react';
-import { sortBy, uniq, without } from 'lodash';
-import LanguageFacetFooter from './LanguageFacetFooter';
+import * as React from 'react';
+import { sortBy, without } from 'lodash';
 import FacetBox from '../../../components/facet/FacetBox';
 import FacetHeader from '../../../components/facet/FacetHeader';
 import FacetItem from '../../../components/facet/FacetItem';
 import FacetItemsList from '../../../components/facet/FacetItemsList';
+import { formatFacetStat, Query } from '../utils';
 import { translate } from '../../../helpers/l10n';
-import { formatFacetStat } from '../utils';
-/*:: import type { ReferencedLanguage } from '../utils'; */
 
-/*::
-type Props = {|
-  facetMode: string,
-  onChange: (changes: { [string]: Array<string> }) => void,
-  onToggle: (property: string) => void,
-  open: boolean,
-  stats?: { [string]: number },
-  referencedLanguages: { [string]: ReferencedLanguage },
-  languages: Array<string>
-|};
-*/
+interface Props {
+  facetMode: string;
+  onChange: (changes: Partial<Query>) => void;
+  onToggle: (property: string) => void;
+  open: boolean;
+  stats: { [x: string]: number } | undefined;
+  authors: string[];
+}
 
-export default class LanguageFacet extends React.PureComponent {
-  /*:: props: Props; */
-
-  property = 'languages';
+export default class AuthorFacet extends React.PureComponent<Props> {
+  property = 'authors';
 
   static defaultProps = {
     open: true
   };
 
-  handleItemClick = (itemValue /*: string */) => {
-    const { languages } = this.props;
+  handleItemClick = (itemValue: string) => {
+    const { authors } = this.props;
     const newValue = sortBy(
-      languages.includes(itemValue) ? without(languages, itemValue) : [...languages, itemValue]
+      authors.includes(itemValue) ? without(authors, itemValue) : [...authors, itemValue]
     );
     this.props.onChange({ [this.property]: newValue });
   };
@@ -66,20 +58,10 @@ export default class LanguageFacet extends React.PureComponent {
     this.props.onChange({ [this.property]: [] });
   };
 
-  getLanguageName(language /*: string */) /*: string */ {
-    const { referencedLanguages } = this.props;
-    return referencedLanguages[language] ? referencedLanguages[language].name : language;
-  }
-
-  getStat(language /*: string */) /*: ?number */ {
+  getStat(author: string) {
     const { stats } = this.props;
-    return stats ? stats[language] : null;
+    return stats ? stats[author] : undefined;
   }
-
-  handleSelect = (language /*: string */) => {
-    const { languages } = this.props;
-    this.props.onChange({ [this.property]: uniq([...languages, language]) });
-  };
 
   renderList() {
     const { stats } = this.props;
@@ -88,34 +70,25 @@ export default class LanguageFacet extends React.PureComponent {
       return null;
     }
 
-    const languages = sortBy(Object.keys(stats), key => -stats[key]);
+    const authors = sortBy(Object.keys(stats), key => -stats[key]);
 
     return (
       <FacetItemsList>
-        {languages.map(language => (
+        {authors.map(author => (
           <FacetItem
-            active={this.props.languages.includes(language)}
-            key={language}
-            name={this.getLanguageName(language)}
+            active={this.props.authors.includes(author)}
+            key={author}
+            name={author}
             onClick={this.handleItemClick}
-            stat={formatFacetStat(this.getStat(language), this.props.facetMode)}
-            value={language}
+            stat={formatFacetStat(this.getStat(author), this.props.facetMode)}
+            value={author}
           />
         ))}
       </FacetItemsList>
     );
   }
 
-  renderFooter() {
-    if (!this.props.stats) {
-      return null;
-    }
-
-    return <LanguageFacetFooter onSelect={this.handleSelect} />;
-  }
-
   render() {
-    const values = this.props.languages.map(language => this.getLanguageName(language));
     return (
       <FacetBox property={this.property}>
         <FacetHeader
@@ -123,11 +96,10 @@ export default class LanguageFacet extends React.PureComponent {
           onClear={this.handleClear}
           onClick={this.handleHeaderClick}
           open={this.props.open}
-          values={values}
+          values={this.props.authors}
         />
 
         {this.props.open && this.renderList()}
-        {this.props.open && this.renderFooter()}
       </FacetBox>
     );
   }
