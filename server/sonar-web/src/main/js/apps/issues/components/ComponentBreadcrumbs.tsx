@@ -19,10 +19,10 @@
  */
 import * as React from 'react';
 import { Link } from 'react-router';
+import { Component } from '../../../app/types';
 import Organization from '../../../components/shared/Organization';
 import { collapsePath, limitComponentName } from '../../../helpers/path';
 import { getProjectUrl } from '../../../helpers/urls';
-import { Component } from '../../../app/types';
 
 interface Props {
   branch?: string;

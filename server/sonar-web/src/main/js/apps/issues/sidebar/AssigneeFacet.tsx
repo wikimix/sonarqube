@@ -19,15 +19,15 @@
  */
 import * as React from 'react';
 import { sortBy, uniq, without } from 'lodash';
-import Avatar from '../../../components/ui/Avatar';
+import { searchAssignees, formatFacetStat, Query, ReferencedUser } from '../utils';
+import { Component } from '../../../app/types';
 import FacetBox from '../../../components/facet/FacetBox';
+import FacetFooter from '../../../components/facet/FacetFooter';
 import FacetHeader from '../../../components/facet/FacetHeader';
 import FacetItem from '../../../components/facet/FacetItem';
 import FacetItemsList from '../../../components/facet/FacetItemsList';
-import FacetFooter from '../../../components/facet/FacetFooter';
-import { searchAssignees, formatFacetStat, Query, ReferencedUser } from '../utils';
+import Avatar from '../../../components/ui/Avatar';
 import { translate } from '../../../helpers/l10n';
-import { Component } from '../../../app/types';
 
 export interface Props {
   assigned: boolean;

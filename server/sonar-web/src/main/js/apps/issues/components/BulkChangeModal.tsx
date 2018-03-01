@@ -19,20 +19,20 @@
  */
 import * as React from 'react';
 import { pickBy, sortBy } from 'lodash';
+import { searchAssignees } from '../utils';
+import { searchIssueTags, bulkChangeIssues } from '../../../api/issues';
+import { Component, CurrentUser, Issue, Paging, isLoggedIn } from '../../../app/types';
+import throwGlobalError from '../../../app/utils/throwGlobalError';
+import MarkdownTips from '../../../components/common/MarkdownTips';
 import SearchSelect from '../../../components/controls/SearchSelect';
 import Checkbox from '../../../components/controls/Checkbox';
 import Modal from '../../../components/controls/Modal';
 import Select from '../../../components/controls/Select';
 import Tooltip from '../../../components/controls/Tooltip';
-import MarkdownTips from '../../../components/common/MarkdownTips';
 import SeverityHelper from '../../../components/shared/SeverityHelper';
 import Avatar from '../../../components/ui/Avatar';
 import IssueTypeIcon from '../../../components/ui/IssueTypeIcon';
-import throwGlobalError from '../../../app/utils/throwGlobalError';
-import { searchIssueTags, bulkChangeIssues } from '../../../api/issues';
 import { translate, translateWithParameters } from '../../../helpers/l10n';
-import { searchAssignees } from '../utils';
-import { Component, CurrentUser, Issue, Paging, isLoggedIn } from '../../../app/types';
 
 interface Props {
   component: Component | undefined;

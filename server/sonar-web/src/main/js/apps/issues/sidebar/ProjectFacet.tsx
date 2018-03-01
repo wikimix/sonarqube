@@ -19,6 +19,9 @@
  */
 import * as React from 'react';
 import { sortBy, uniq, without } from 'lodash';
+import { formatFacetStat, Query, ReferencedComponent } from '../utils';
+import { searchProjects, getTree } from '../../../api/components';
+import { Component } from '../../../app/types';
 import FacetBox from '../../../components/facet/FacetBox';
 import FacetHeader from '../../../components/facet/FacetHeader';
 import FacetItem from '../../../components/facet/FacetItem';
@@ -26,10 +29,7 @@ import FacetItemsList from '../../../components/facet/FacetItemsList';
 import FacetFooter from '../../../components/facet/FacetFooter';
 import Organization from '../../../components/shared/Organization';
 import QualifierIcon from '../../../components/shared/QualifierIcon';
-import { searchProjects, getTree } from '../../../api/components';
 import { translate } from '../../../helpers/l10n';
-import { formatFacetStat, Query, ReferencedComponent } from '../utils';
-import { Component } from '../../../app/types';
 
 interface Props {
   component: Component | undefined;

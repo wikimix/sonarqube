@@ -20,19 +20,19 @@
 import * as React from 'react';
 import { max } from 'lodash';
 import { intlShape } from 'react-intl';
-import DateFromNow from '../../../components/intl/DateFromNow';
-import { longFormatterOption } from '../../../components/intl/DateFormatter';
-import DateTimeFormatter from '../../../components/intl/DateTimeFormatter';
+import { Query } from '../utils';
+import { Component } from '../../../app/types';
 import FacetBox from '../../../components/facet/FacetBox';
 import FacetHeader from '../../../components/facet/FacetHeader';
 import FacetItem from '../../../components/facet/FacetItem';
+import { longFormatterOption } from '../../../components/intl/DateFormatter';
+import DateFromNow from '../../../components/intl/DateFromNow';
+import DateTimeFormatter from '../../../components/intl/DateTimeFormatter';
 import { BarChart } from '../../../components/charts/bar-chart';
 import DateInput from '../../../components/controls/DateInput';
 import { isSameDay, parseDate, toShortNotSoISOString } from '../../../helpers/dates';
 import { translate } from '../../../helpers/l10n';
 import { formatMeasure } from '../../../helpers/measures';
-import { Component } from '../../../app/types';
-import { Query } from '../utils';
 
 interface Props {
   component: Component | undefined;

@@ -19,8 +19,8 @@
  */
 import * as React from 'react';
 import ListItem from './ListItem';
-import { Component, Issue } from '../../../app/types';
 import { Query } from '../utils';
+import { Component, Issue } from '../../../app/types';
 
 interface Props {
   branch: string | undefined;

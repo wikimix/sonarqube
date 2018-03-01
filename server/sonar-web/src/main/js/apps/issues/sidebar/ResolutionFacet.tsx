@@ -19,12 +19,12 @@
  */
 import * as React from 'react';
 import { orderBy, without } from 'lodash';
+import { formatFacetStat, Query } from '../utils';
 import FacetBox from '../../../components/facet/FacetBox';
 import FacetHeader from '../../../components/facet/FacetHeader';
 import FacetItem from '../../../components/facet/FacetItem';
 import FacetItemsList from '../../../components/facet/FacetItemsList';
 import { translate } from '../../../helpers/l10n';
-import { formatFacetStat, Query } from '../utils';
 
 interface Props {
   facetMode: string;

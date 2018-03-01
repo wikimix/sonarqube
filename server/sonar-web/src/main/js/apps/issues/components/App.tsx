@@ -22,13 +22,13 @@ import Helmet from 'react-helmet';
 import * as key from 'keymaster';
 import { keyBy, without } from 'lodash';
 import * as PropTypes from 'prop-types';
-import PageActions from './PageActions';
-import MyIssuesFilter from './MyIssuesFilter';
-import IssuesList from './IssuesList';
-import ComponentBreadcrumbs from './ComponentBreadcrumbs';
-import IssuesSourceViewer from './IssuesSourceViewer';
 import BulkChangeModal from './BulkChangeModal';
+import ComponentBreadcrumbs from './ComponentBreadcrumbs';
+import IssuesList from './IssuesList';
+import IssuesSourceViewer from './IssuesSourceViewer';
+import MyIssuesFilter from './MyIssuesFilter';
 import NoMyIssues from './NoMyIssues';
+import PageActions from './PageActions';
 import ConciseIssuesList from '../conciseIssuesList/ConciseIssuesList';
 import ConciseIssuesListHeader from '../conciseIssuesList/ConciseIssuesListHeader';
 import Sidebar from '../sidebar/Sidebar';
@@ -48,29 +48,17 @@ import {
   ReferencedLanguage,
   ReferencedUser
 } from '../utils';
-/*:: import type {
-  Query,
-  Paging,
-  Facet,
-  ReferencedComponent,
-  ReferencedUser,
-  ReferencedLanguage,
-  Component,
-  CurrentUser
-} from '../utils'; */
-import handleRequiredAuthentication from '../../../app/utils/handleRequiredAuthentication';
 import { isLoggedIn, Component, CurrentUser, Issue, Paging, Branch } from '../../../app/types';
-import ListFooter from '../../../components/controls/ListFooter';
+import handleRequiredAuthentication from '../../../app/utils/handleRequiredAuthentication';
 import EmptySearch from '../../../components/common/EmptySearch';
 import FiltersHeader from '../../../components/common/FiltersHeader';
 import ScreenPositionHelper from '../../../components/common/ScreenPositionHelper';
+import ListFooter from '../../../components/controls/ListFooter';
 import { getBranchName, isShortLivingBranch } from '../../../helpers/branches';
 import { translate, translateWithParameters } from '../../../helpers/l10n';
-import { scrollToElement } from '../../../helpers/scrolling';
-/*:: import type { Issue } from '../../../components/issue/types'; */
-/*:: import type { RawQuery } from '../../../helpers/query'; */
-import '../styles.css';
 import { RawQuery } from '../../../helpers/query';
+import { scrollToElement } from '../../../helpers/scrolling';
+import '../styles.css';
 
 interface Props {
   branch?: Branch;

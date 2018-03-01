@@ -21,9 +21,9 @@ import * as React from 'react';
 import * as classNames from 'classnames';
 import ConciseIssueLocations from './ConciseIssueLocations';
 import ConciseIssueLocationsNavigator from './ConciseIssueLocationsNavigator';
+import { Issue } from '../../../app/types';
 import SeverityHelper from '../../../components/shared/SeverityHelper';
 import TypeHelper from '../../../components/shared/TypeHelper';
-import { Issue } from '../../../app/types';
 
 interface Props {
   issue: Issue;
