@@ -57,7 +57,6 @@ import static org.sonar.core.permission.GlobalPermissions.SCAN_EXECUTION;
 import static org.sonar.core.util.Protobuf.setNullable;
 import static org.sonar.core.util.stream.MoreCollectors.toList;
 import static org.sonar.core.util.stream.MoreCollectors.uniqueIndex;
-import static org.sonar.db.component.BranchType.LONG;
 import static org.sonar.db.component.BranchType.SHORT;
 import static org.sonar.server.branch.ws.BranchesWs.addProjectParam;
 import static org.sonar.server.branch.ws.ProjectBranchesParameters.ACTION_LIST;
@@ -151,7 +150,7 @@ public class ListAction implements BranchWsAction {
   private static void setBranchStatus(ProjectBranches.Branch.Builder builder, BranchDto branch, @Nullable LiveMeasureDto qualityGateMeasure,
                                       @Nullable BranchStatistics branchStatistics) {
     ProjectBranches.Branch.Status.Builder statusBuilder = ProjectBranches.Branch.Status.newBuilder();
-    if (branch.getBranchType() == LONG && qualityGateMeasure != null) {
+    if (qualityGateMeasure != null) {
       Protobuf.setNullable(qualityGateMeasure.getDataAsString(), statusBuilder::setQualityGateStatus);
     }
     if (branch.getBranchType() == BranchType.SHORT) {
