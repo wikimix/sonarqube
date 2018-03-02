@@ -56,11 +56,11 @@ export default class Sidebar extends React.PureComponent<Props> {
     const { component, facets, openFacets, query } = this.props;
 
     const displayProjectsFacet =
-      component == null || !['TRK', 'BRC', 'DIR', 'DEV_PRJ'].includes(component.qualifier);
-    const displayModulesFacet = component != null && component.qualifier !== 'DIR';
-    const displayDirectoriesFacet = component != null && component.qualifier !== 'DIR';
-    const displayFilesFacet = component != null;
-    const displayAuthorFacet = component == null || component.qualifier !== 'DEV';
+      !component || !['TRK', 'BRC', 'DIR', 'DEV_PRJ'].includes(component.qualifier);
+    const displayModulesFacet = component !== undefined && component.qualifier !== 'DIR';
+    const displayDirectoriesFacet = component !== undefined && component.qualifier !== 'DIR';
+    const displayFilesFacet = component !== undefined;
+    const displayAuthorFacet = !component || component.qualifier !== 'DEV';
 
     return (
       <div className="search-navigator-facets-list">

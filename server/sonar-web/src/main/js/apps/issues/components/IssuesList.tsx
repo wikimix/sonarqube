@@ -24,7 +24,7 @@ import { Component, Issue } from '../../../app/types';
 
 interface Props {
   branch: string | undefined;
-  checked: Array<string>;
+  checked: string[];
   component: Component | undefined;
   issues: Issue[];
   onFilterChange: (changes: Partial<Query>) => void;

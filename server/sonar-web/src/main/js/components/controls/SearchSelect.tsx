@@ -39,7 +39,7 @@ interface Props {
   promptTextCreator?: (label: string) => string;
   renderOption?: (option: Object) => JSX.Element;
   resetOnBlur?: boolean;
-  value?: string;
+  value?: string | string[];
 }
 
 interface State {

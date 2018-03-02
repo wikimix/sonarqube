@@ -26,7 +26,7 @@ import HomePageSelect from '../../../components/controls/HomePageSelect';
 import { translate } from '../../../helpers/l10n';
 
 interface Props {
-  canSetHome?: boolean;
+  canSetHome: boolean;
   loading: boolean;
   onReload: () => void;
   paging: Paging | undefined;

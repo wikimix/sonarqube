@@ -127,7 +127,7 @@ export function serializeQuery(query: Query): RawQuery {
 export const areQueriesEqual = (a: RawQuery, b: RawQuery) =>
   queriesEqual(parseQuery(a), parseQuery(b));
 
-interface RawFacet {
+export interface RawFacet {
   property: string;
   values: Array<{ val: string; count: number }>;
 }

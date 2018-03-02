@@ -25,8 +25,8 @@ import { collapsePath, limitComponentName } from '../../../helpers/path';
 import { getProjectUrl } from '../../../helpers/urls';
 
 interface Props {
-  branch?: string;
-  component?: Component;
+  branch: string | undefined;
+  component: Component | undefined;
   issue: {
     component: string;
     componentLongName: string;
@@ -36,14 +36,14 @@ interface Props {
     subProject?: string;
     subProjectName?: string;
   };
-  organization?: { key: string };
+  organization: { key: string } | undefined;
 }
 
 export default function ComponentBreadcrumbs({ branch, component, issue, organization }: Props) {
   const displayOrganization =
-    !organization && (component == null || ['VW', 'SVW'].includes(component.qualifier));
-  const displayProject = component == null || !['TRK', 'BRC', 'DIR'].includes(component.qualifier);
-  const displaySubProject = component == null || !['BRC', 'DIR'].includes(component.qualifier);
+    !organization && (!component || ['VW', 'SVW'].includes(component.qualifier));
+  const displayProject = !component || !['TRK', 'BRC', 'DIR'].includes(component.qualifier);
+  const displaySubProject = !component || !['BRC', 'DIR'].includes(component.qualifier);
 
   return (
     <div className="component-name text-ellipsis">

@@ -23,7 +23,7 @@ import { Issue as IssueType, Component } from '../../../app/types';
 import Issue from '../../../components/issue/Issue';
 
 interface Props {
-  branch?: string;
+  branch: string | undefined;
   checked: boolean;
   component: Component | undefined;
   issue: IssueType;
@@ -63,11 +63,11 @@ export default class ListItem extends React.PureComponent<Props, State> {
       case 'status':
         return onFilterChange({ ...issuesReset, statuses: [issue.status] });
       case 'resolution':
-        return issue.resolution != null
+        return issue.resolution
           ? onFilterChange({ ...issuesReset, resolved: true, resolutions: [issue.resolution] })
           : onFilterChange({ ...issuesReset, resolved: false, resolutions: [] });
       case 'assignee':
-        return issue.assignee != null
+        return issue.assignee
           ? onFilterChange({ ...issuesReset, assigned: true, assignees: [issue.assignee] })
           : onFilterChange({ ...issuesReset, assigned: false, assignees: [] });
       case 'rule':
@@ -84,7 +84,7 @@ export default class ListItem extends React.PureComponent<Props, State> {
   render() {
     const { branch, component, issue, previousIssue } = this.props;
 
-    const displayComponent = previousIssue == null || previousIssue.component !== issue.component;
+    const displayComponent = !previousIssue || previousIssue.component !== issue.component;
 
     return (
       <div className="issues-workspace-list-item">

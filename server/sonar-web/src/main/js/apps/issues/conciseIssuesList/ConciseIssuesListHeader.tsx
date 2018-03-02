@@ -27,8 +27,8 @@ interface Props {
   loading: boolean;
   onBackClick: () => void;
   onReload: () => void;
-  paging?: Paging;
-  selectedIndex?: number;
+  paging: Paging | undefined;
+  selectedIndex: number | undefined;
 }
 
 export default function ConciseIssuesListHeader(props: Props) {
@@ -43,7 +43,7 @@ export default function ConciseIssuesListHeader(props: Props) {
         ) : (
           <ReloadButton className="pull-right" onClick={props.onReload} />
         )}
-        {paging != null && <IssuesCounter current={selectedIndex} total={paging.total} />}
+        {paging && <IssuesCounter current={selectedIndex} total={paging.total} />}
       </div>
     </header>
   );

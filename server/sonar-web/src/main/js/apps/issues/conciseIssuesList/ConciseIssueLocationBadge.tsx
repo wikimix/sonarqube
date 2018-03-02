@@ -26,7 +26,7 @@ import { formatMeasure } from '../../../helpers/measures';
 interface Props {
   count: number;
   onClick?: () => void;
-  selected?: boolean;
+  selected: boolean;
 }
 
 export default function ConciseIssueLocationBadge(props: Props) {

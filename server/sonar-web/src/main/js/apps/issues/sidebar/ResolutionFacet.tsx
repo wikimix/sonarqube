@@ -32,7 +32,7 @@ interface Props {
   onToggle: (property: string) => void;
   open: boolean;
   resolved: boolean;
-  resolutions: Array<string>;
+  resolutions: string[];
   stats: { [x: string]: number } | undefined;
 }
 

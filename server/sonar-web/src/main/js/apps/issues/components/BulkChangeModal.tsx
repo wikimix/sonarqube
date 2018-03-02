@@ -40,19 +40,10 @@ interface Props {
   fetchIssues: (x: {}) => Promise<{ issues: Issue[]; paging: Paging }>;
   onClose: () => void;
   onDone: () => void;
-  organization?: { key: string };
+  organization: { key: string } | undefined;
 }
 
-interface State {
-  initialTags: Array<{ label: string; value: string }>;
-  issues: Issue[];
-  // used for initial loading of issues
-  loading: boolean;
-  paging?: Paging;
-  // used when submitting a form
-  submitting: boolean;
-
-  // form fields
+interface FormFields {
   addTags?: Array<{ label: string; value: string }>;
   assignee?: string;
   comment?: string;
@@ -62,8 +53,16 @@ interface State {
   severity?: string;
   transition?: string;
   type?: string;
+}
 
-  [x: string]: any;
+interface State extends FormFields {
+  initialTags: Array<{ label: string; value: string }>;
+  issues: Issue[];
+  // used for initial loading of issues
+  loading: boolean;
+  paging?: Paging;
+  // used when submitting a form
+  submitting: boolean;
 }
 
 export default class BulkChangeModal extends React.PureComponent<Props, State> {
@@ -150,26 +149,28 @@ export default class BulkChangeModal extends React.PureComponent<Props, State> {
     );
   };
 
-  handleTagsSelect = (field: string) => (options: Array<{ label: string; value: string }>) => {
-    this.setState({ [field]: options });
+  handleTagsSelect = (field: 'addTags' | 'removeTags') => (
+    options: Array<{ label: string; value: string }>
+  ) => {
+    this.setState<keyof FormFields>({ [field]: options });
   };
 
-  handleFieldCheck = (field: string) => (checked: boolean) => {
+  handleFieldCheck = (field: keyof FormFields) => (checked: boolean) => {
     if (!checked) {
-      this.setState({ [field]: undefined });
+      this.setState<keyof FormFields>({ [field]: undefined });
     } else if (field === 'notifications') {
-      this.setState({ [field]: true });
+      this.setState<keyof FormFields>({ [field]: true });
     }
   };
 
-  handleFieldChange = (field: string) => (
+  handleFieldChange = (field: 'comment' | 'transition') => (
     event: React.SyntheticEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
-    this.setState({ [field]: event.currentTarget.value });
+    this.setState<keyof FormFields>({ [field]: event.currentTarget.value });
   };
 
-  handleSelectFieldChange = (field: string) => ({ value }: { value: string }) => {
-    this.setState({ [field]: value });
+  handleSelectFieldChange = (field: 'severity' | 'type') => ({ value }: { value: string }) => {
+    this.setState<keyof FormFields>({ [field]: value });
   };
 
   handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
@@ -186,8 +187,7 @@ export default class BulkChangeModal extends React.PureComponent<Props, State> {
         set_severity: this.state.severity,
         set_type: this.state.type
       },
-      // remove null, but keep empty string
-      x => x != null
+      x => x !== undefined
     );
     /* eslint-enable camelcase */
     const issueKeys = this.state.issues.map(issue => issue.key);
@@ -210,7 +210,7 @@ export default class BulkChangeModal extends React.PureComponent<Props, State> {
     issues.forEach(issue => {
       if (issue.transitions) {
         issue.transitions.forEach(t => {
-          if (transitions[t] != null) {
+          if (transitions[t] !== undefined) {
             transitions[t]++;
           } else {
             transitions[t] = 1;
@@ -244,8 +244,8 @@ export default class BulkChangeModal extends React.PureComponent<Props, State> {
     </div>
   );
 
-  renderCheckbox = (field: string) => (
-    <Checkbox checked={this.state[field] != null} onCheck={this.handleFieldCheck(field)} />
+  renderCheckbox = (field: keyof FormFields) => (
+    <Checkbox checked={this.state[field] !== undefined} onCheck={this.handleFieldCheck(field)} />
   );
 
   renderAffected = (affected: number) => (
@@ -255,7 +255,7 @@ export default class BulkChangeModal extends React.PureComponent<Props, State> {
   );
 
   renderField = (
-    field: string,
+    field: 'addTags' | 'assignee' | 'removeTags' | 'severity' | 'type',
     label: string,
     affected: number | undefined,
     input: React.ReactNode
@@ -264,14 +264,14 @@ export default class BulkChangeModal extends React.PureComponent<Props, State> {
       <label htmlFor={field}>{translate(label)}</label>
       {this.renderCheckbox(field)}
       {input}
-      {affected != null && this.renderAffected(affected)}
+      {affected !== undefined && this.renderAffected(affected)}
     </div>
   );
 
   renderAssigneeOption = (option: { avatar?: string; email?: string; label: string }) => {
     return (
       <span>
-        {option.avatar != null && (
+        {option.avatar !== undefined && (
           <Avatar className="spacer-right" hash={option.avatar} name={option.label} size={16} />
         )}
         {option.label}
@@ -360,13 +360,15 @@ export default class BulkChangeModal extends React.PureComponent<Props, State> {
     return this.renderField('severity', 'issue.set_severity', affected, input);
   };
 
-  renderTagsField = (field: string, label: string, allowCreate: boolean) => {
+  renderTagsField = (field: 'addTags' | 'removeTags', label: string, allowCreate: boolean) => {
     const { initialTags } = this.state;
     const affected = this.state.issues.filter(hasAction('set_tags')).length;
 
-    if (initialTags == null || affected === 0) {
+    if (initialTags === undefined || affected === 0) {
       return null;
     }
+
+    const value = (this.state[field] || []).map(x => x.value);
 
     const input = (
       <SearchSelect
@@ -379,7 +381,7 @@ export default class BulkChangeModal extends React.PureComponent<Props, State> {
         promptTextCreator={promptCreateTag}
         renderOption={this.renderAssigneeOption}
         resetOnBlur={false}
-        value={this.state[field]}
+        value={value}
       />
     );
 
@@ -460,8 +462,7 @@ export default class BulkChangeModal extends React.PureComponent<Props, State> {
   renderForm = () => {
     const { issues, paging, submitting } = this.state;
 
-    const limitReached /*: boolean */ =
-      paging != null && paging.total > paging.pageIndex * paging.pageSize;
+    const limitReached = paging !== undefined && paging.total > paging.pageIndex * paging.pageSize;
 
     return (
       <form id="bulk-change-form" onSubmit={this.handleSubmit}>

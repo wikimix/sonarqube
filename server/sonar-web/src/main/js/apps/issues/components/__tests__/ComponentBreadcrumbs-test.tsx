@@ -30,15 +30,42 @@ const baseIssue = {
 };
 
 it('renders', () => {
-  expect(shallow(<ComponentBreadcrumbs issue={baseIssue} />)).toMatchSnapshot();
+  expect(
+    shallow(
+      <ComponentBreadcrumbs
+        branch={undefined}
+        component={undefined}
+        issue={baseIssue}
+        organization={undefined}
+      />
+    )
+  ).toMatchSnapshot();
 });
 
 it('renders with sub-project', () => {
   const issue = { ...baseIssue, subProject: 'sub-proj', subProjectName: 'sub-proj-name' };
-  expect(shallow(<ComponentBreadcrumbs issue={issue} />)).toMatchSnapshot();
+  expect(
+    shallow(
+      <ComponentBreadcrumbs
+        branch={undefined}
+        component={undefined}
+        issue={issue}
+        organization={undefined}
+      />
+    )
+  ).toMatchSnapshot();
 });
 
 it('renders with branch', () => {
   const issue = { ...baseIssue, subProject: 'sub-proj', subProjectName: 'sub-proj-name' };
-  expect(shallow(<ComponentBreadcrumbs branch="feature" issue={issue} />)).toMatchSnapshot();
+  expect(
+    shallow(
+      <ComponentBreadcrumbs
+        branch="feature"
+        component={undefined}
+        issue={issue}
+        organization={undefined}
+      />
+    )
+  ).toMatchSnapshot();
 });

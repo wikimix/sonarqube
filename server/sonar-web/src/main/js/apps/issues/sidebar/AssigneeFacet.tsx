@@ -130,7 +130,7 @@ export default class AssigneeFacet extends React.PureComponent<Props> {
   renderOption = (option: { avatar: string; label: string }) => {
     return (
       <span>
-        {option.avatar != null && (
+        {option.avatar !== undefined && (
           <Avatar
             className="little-spacer-right"
             hash={option.avatar}

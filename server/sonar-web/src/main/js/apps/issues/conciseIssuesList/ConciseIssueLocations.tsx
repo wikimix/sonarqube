@@ -59,7 +59,7 @@ export default class ConciseIssueLocations extends React.PureComponent<Props, St
         <ConciseIssueLocationBadge
           count={secondaryLocations.length}
           key="-1"
-          selected={this.props.selectedFlowIndex == null}
+          selected={!this.props.selectedFlowIndex}
         />
       );
     }

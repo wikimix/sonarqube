@@ -57,11 +57,11 @@ export default class ConciseIssueBox extends React.PureComponent<Props> {
     const { flows, secondaryLocations } = this.props.issue;
 
     const locations =
-      selectedFlowIndex != null
+      selectedFlowIndex !== undefined
         ? flows[selectedFlowIndex]
         : flows.length > 0 ? flows[0] : secondaryLocations;
 
-    if (locations == null || locations.length < 15) {
+    if (!locations || locations.length < 15) {
       // if there are no locations, or there are just few
       // then ensuse that the whole box is visible
       if (this.rootElement) this.props.scroll(this.rootElement);

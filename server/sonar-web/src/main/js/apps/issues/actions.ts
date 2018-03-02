@@ -37,15 +37,15 @@ export function disableLocationsNavigator(): Partial<State> {
   return { locationsNavigator: false };
 }
 
-export function selectLocation(nextIndex?: number) {
+export function selectLocation(nextIndex: number | undefined) {
   return (state: State): Partial<State> | undefined => {
     const { selectedLocationIndex: index, openIssue } = state;
     if (openIssue) {
       if (!state.locationsNavigator) {
-        if (nextIndex != null) {
+        if (nextIndex !== undefined) {
           return { locationsNavigator: true, selectedLocationIndex: nextIndex };
         }
-      } else if (index != null) {
+      } else if (index !== undefined) {
         // disable locations when selecting (clicking) the same location
         return {
           locationsNavigator: nextIndex !== index,
@@ -61,14 +61,16 @@ export function selectNextLocation(state: State): Partial<State> | undefined {
   const { selectedFlowIndex, selectedLocationIndex: index, openIssue } = state;
   if (openIssue) {
     const locations =
-      selectedFlowIndex != null ? openIssue.flows[selectedFlowIndex] : openIssue.secondaryLocations;
+      selectedFlowIndex !== undefined
+        ? openIssue.flows[selectedFlowIndex]
+        : openIssue.secondaryLocations;
     const lastLocationIdx = locations.length - 1;
     if (index === lastLocationIdx) {
       // -1 to jump back to the issue itself
       return { selectedLocationIndex: -1 };
     }
     return {
-      selectedLocationIndex: index != null && index < lastLocationIdx ? index + 1 : index
+      selectedLocationIndex: index !== undefined && index < lastLocationIdx ? index + 1 : index
     };
   }
   return undefined;
@@ -79,13 +81,13 @@ export function selectPreviousLocation(state: State): Partial<State> | undefined
   if (openIssue) {
     if (index === -1) {
       const locations =
-        selectedFlowIndex != null
+        selectedFlowIndex !== undefined
           ? openIssue.flows[selectedFlowIndex]
           : openIssue.secondaryLocations;
       const lastLocationIdx = locations.length - 1;
       return { selectedLocationIndex: lastLocationIdx };
     }
-    return { selectedLocationIndex: index != null && index > 0 ? index - 1 : index };
+    return { selectedLocationIndex: index !== undefined && index > 0 ? index - 1 : index };
   }
   return undefined;
 }
@@ -98,7 +100,11 @@ export function selectFlow(nextIndex?: number) {
 
 export function selectNextFlow(state: State): Partial<State> | undefined {
   const { openIssue, selectedFlowIndex } = state;
-  if (openIssue && selectedFlowIndex != null && openIssue.flows.length > selectedFlowIndex + 1) {
+  if (
+    openIssue &&
+    selectedFlowIndex !== undefined &&
+    openIssue.flows.length > selectedFlowIndex + 1
+  ) {
     return { selectedFlowIndex: selectedFlowIndex + 1, selectedLocationIndex: 0 };
   }
   return undefined;
@@ -106,7 +112,7 @@ export function selectNextFlow(state: State): Partial<State> | undefined {
 
 export function selectPreviousFlow(state: State): Partial<State> | undefined {
   const { openIssue, selectedFlowIndex } = state;
-  if (openIssue && selectedFlowIndex != null && selectedFlowIndex > 0) {
+  if (openIssue && selectedFlowIndex !== undefined && selectedFlowIndex > 0) {
     return { selectedFlowIndex: selectedFlowIndex - 1, selectedLocationIndex: 0 };
   }
   return undefined;

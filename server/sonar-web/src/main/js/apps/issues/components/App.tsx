@@ -34,19 +34,20 @@ import ConciseIssuesListHeader from '../conciseIssuesList/ConciseIssuesListHeade
 import Sidebar from '../sidebar/Sidebar';
 import * as actions from '../actions';
 import {
-  parseQuery,
   areMyIssuesSelected,
   areQueriesEqual,
-  getOpen,
-  serializeQuery,
-  parseFacets,
-  mapFacet,
-  saveMyIssues,
   Facet,
+  getOpen,
+  mapFacet,
+  parseFacets,
+  parseQuery,
   Query,
+  RawFacet,
   ReferencedComponent,
   ReferencedLanguage,
-  ReferencedUser
+  ReferencedUser,
+  saveMyIssues,
+  serializeQuery
 } from '../utils';
 import { isLoggedIn, Component, CurrentUser, Issue, Paging, Branch } from '../../../app/types';
 import handleRequiredAuthentication from '../../../app/utils/handleRequiredAuthentication';
@@ -64,7 +65,18 @@ interface Props {
   branch?: Branch;
   component?: Component;
   currentUser: CurrentUser;
-  fetchIssues: (query: RawQuery, requestOrganizations?: boolean) => Promise<any>;
+  fetchIssues: (
+    query: RawQuery,
+    requestOrganizations?: boolean
+  ) => Promise<{
+    components: ReferencedComponent[];
+    facets: RawFacet[];
+    issues: Issue[];
+    languages: ReferencedLanguage[];
+    paging: Paging;
+    rules: { name: string }[];
+    users: ReferencedUser[];
+  }>;
   location: { pathname: string; query: RawQuery };
   myIssues?: boolean;
   onBranchesChange: () => void;
@@ -73,7 +85,7 @@ interface Props {
 }
 
 export interface State {
-  bulkChange: 'all' | 'selected' | null;
+  bulkChange?: 'all' | 'selected';
   checked: string[];
   facets: { [facet: string]: Facet };
   issues: Issue[];
@@ -106,7 +118,6 @@ export default class App extends React.PureComponent<Props, State> {
   constructor(props: Props) {
     super(props);
     this.state = {
-      bulkChange: null,
       checked: [],
       facets: {},
       issues: [],
@@ -145,7 +156,7 @@ export default class App extends React.PureComponent<Props, State> {
   componentWillReceiveProps(nextProps: Props) {
     const openIssue = this.getOpenIssue(nextProps, this.state.issues);
 
-    if (openIssue != null && openIssue.key !== this.state.selected) {
+    if (openIssue && openIssue.key !== this.state.selected) {
       this.setState({
         locationsNavigator: false,
         selected: openIssue.key,
@@ -154,7 +165,7 @@ export default class App extends React.PureComponent<Props, State> {
       });
     }
 
-    if (openIssue == null) {
+    if (!openIssue) {
       this.setState({ selectedFlowIndex: undefined, selectedLocationIndex: undefined });
     }
 
@@ -177,7 +188,7 @@ export default class App extends React.PureComponent<Props, State> {
       this.fetchFirstIssues();
     } else if (
       !this.state.openIssue &&
-      (prevState.selected !== this.state.selected || prevState.openIssue != null)
+      (prevState.selected !== this.state.selected || prevState.openIssue)
     ) {
       // if user simply selected another issue
       // or if he went from the source code back to the list of issues
@@ -264,7 +275,7 @@ export default class App extends React.PureComponent<Props, State> {
   };
 
   getSelectedIndex() {
-    const { issues, selected } = this.state;
+    const { issues = [], selected } = this.state;
     const index = issues.findIndex(issue => issue.key === selected);
     return index !== -1 ? index : undefined;
   }
@@ -277,7 +288,7 @@ export default class App extends React.PureComponent<Props, State> {
   selectNextIssue = () => {
     const { issues } = this.state;
     const selectedIndex = this.getSelectedIndex();
-    if (issues != null && selectedIndex != null && selectedIndex < issues.length - 1) {
+    if (selectedIndex !== undefined && selectedIndex < issues.length - 1) {
       if (this.state.openIssue) {
         this.openIssue(issues[selectedIndex + 1].key);
       } else {
@@ -293,7 +304,7 @@ export default class App extends React.PureComponent<Props, State> {
   selectPreviousIssue = () => {
     const { issues } = this.state;
     const selectedIndex = this.getSelectedIndex();
-    if (issues != null && selectedIndex != null && selectedIndex > 0) {
+    if (selectedIndex !== undefined && selectedIndex > 0) {
       if (this.state.openIssue) {
         this.openIssue(issues[selectedIndex - 1].key);
       } else {
@@ -407,8 +418,7 @@ export default class App extends React.PureComponent<Props, State> {
             referencedLanguages: keyBy(other.languages, 'key'),
             referencedRules: keyBy(other.rules, 'key'),
             referencedUsers: keyBy(other.users, 'login'),
-            selected:
-              issues.length > 0 ? (openIssue != null ? openIssue.key : issues[0].key) : undefined,
+            selected: issues.length > 0 ? (openIssue ? openIssue.key : issues[0].key) : undefined,
             selectedFlowIndex: undefined,
             selectedLocationIndex: undefined
           });
@@ -491,7 +501,7 @@ export default class App extends React.PureComponent<Props, State> {
       if (lastIssue.component !== openIssue.component) {
         return true;
       }
-      return lastIssue.textRange != null && lastIssue.textRange.endLine > to;
+      return lastIssue.textRange !== undefined && lastIssue.textRange.endLine > to;
     };
 
     if (done(issues, paging)) {
@@ -556,9 +566,9 @@ export default class App extends React.PureComponent<Props, State> {
   };
 
   getCheckedIssues = () => {
-    const issues = this.state.checked.map(checked =>
-      this.state.issues.find(issue => issue.key === checked)
-    );
+    const issues = this.state.checked
+      .map(checked => this.state.issues.find(issue => issue.key === checked))
+      .filter((issue): issue is Issue => issue !== undefined);
     const paging = { pageIndex: 1, pageSize: issues.length, total: issues.length };
     return Promise.resolve({ issues, paging });
   };
@@ -625,7 +635,7 @@ export default class App extends React.PureComponent<Props, State> {
       if (open !== false && !samePopup) {
         return { openPopup: { issue, name: popupName } };
       } else if (open !== true && samePopup) {
-        return { openPopup: null };
+        return { openPopup: undefined };
       }
       return state;
     });
@@ -652,7 +662,7 @@ export default class App extends React.PureComponent<Props, State> {
 
   closeBulkChange = () => {
     key.setScope('issues');
-    this.setState({ bulkChange: null });
+    this.setState({ bulkChange: undefined });
   };
 
   handleBulkChangeClick = (event: React.MouseEvent<HTMLAnchorElement | HTMLButtonElement>) => {
@@ -698,7 +708,7 @@ export default class App extends React.PureComponent<Props, State> {
     const { component, currentUser } = this.props;
     const { bulkChange, checked, paging } = this.state;
 
-    if (!currentUser.isLoggedIn || openIssue != null) {
+    if (!currentUser.isLoggedIn || openIssue) {
       return null;
     }
 
@@ -728,7 +738,7 @@ export default class App extends React.PureComponent<Props, State> {
             {translate('bulk_change')}
           </button>
         )}
-        {bulkChange != null && (
+        {bulkChange && (
           <BulkChangeModal
             component={component}
             currentUser={currentUser}
@@ -795,7 +805,7 @@ export default class App extends React.PureComponent<Props, State> {
           selectedFlowIndex={this.state.selectedFlowIndex}
           selectedLocationIndex={this.state.selectedLocationIndex}
         />
-        {paging != null &&
+        {paging &&
           paging.total > 0 && (
             <ListFooter
               count={issues.length}
@@ -813,7 +823,7 @@ export default class App extends React.PureComponent<Props, State> {
         {({ top }) => (
           <div className="layout-page-side" style={{ top }}>
             <div className="layout-page-side-inner">
-              {openIssue == null ? this.renderFacets() : this.renderConciseIssuesList()}
+              {openIssue ? this.renderConciseIssuesList() : this.renderFacets()}
             </div>
           </div>
         )}
@@ -825,9 +835,9 @@ export default class App extends React.PureComponent<Props, State> {
     const { branch, component, currentUser, organization } = this.props;
     const { issues, openIssue, paging } = this.state;
     const selectedIndex = this.getSelectedIndex();
-    const selectedIssue = selectedIndex != null ? issues[selectedIndex] : undefined;
+    const selectedIssue = selectedIndex !== undefined ? issues[selectedIndex] : undefined;
 
-    if (paging == null || openIssue != null) {
+    if (!paging || openIssue) {
       return null;
     }
 
@@ -862,7 +872,7 @@ export default class App extends React.PureComponent<Props, State> {
 
   renderShortcutsForLocations() {
     const { openIssue } = this.state;
-    if (openIssue == null || (!openIssue.secondaryLocations.length && !openIssue.flows.length)) {
+    if (!openIssue || (!openIssue.secondaryLocations.length && !openIssue.flows.length)) {
       return null;
     }
     const hasSeveralFlows = openIssue.flows.length > 1;
@@ -898,7 +908,7 @@ export default class App extends React.PureComponent<Props, State> {
             <div className="layout-page-header-panel-inner layout-page-main-header-inner">
               <div className="layout-page-main-inner">
                 {this.renderBulkChange(openIssue)}
-                {openIssue != null ? (
+                {openIssue ? (
                   <div className="pull-left width-60">
                     <ComponentBreadcrumbs
                       branch={getBranchName(this.props.branch)}
@@ -909,13 +919,13 @@ export default class App extends React.PureComponent<Props, State> {
                   </div>
                 ) : (
                   <PageActions
-                    canSetHome={
+                    canSetHome={Boolean(
                       this.props.onSonarCloud &&
-                      isLoggedIn(this.props.currentUser) &&
-                      this.props.myIssues &&
-                      !this.props.organization &&
-                      !this.props.component
-                    }
+                        isLoggedIn(this.props.currentUser) &&
+                        this.props.myIssues &&
+                        !this.props.organization &&
+                        !this.props.component
+                    )}
                     loading={this.state.loading}
                     onReload={this.handleReload}
                     paging={paging}

@@ -22,7 +22,7 @@ import { Dispatch } from 'redux';
 import { uniq } from 'lodash';
 import { searchIssues } from '../../../api/issues';
 import { getOrganizations } from '../../../api/organizations';
-import { CurrentUser } from '../../../app/types';
+import { CurrentUser, Issue } from '../../../app/types';
 import throwGlobalError from '../../../app/utils/throwGlobalError';
 import {
   getCurrentUser,
@@ -47,7 +47,7 @@ const mapStateToProps = (state: any): StateProps => {
   };
 };
 
-const fetchIssueOrganizations = (issues: any[]) => (dispatch: Dispatch<any>) => {
+const fetchIssueOrganizations = (issues: Issue[]) => (dispatch: Dispatch<any>) => {
   if (!issues.length) {
     return Promise.resolve();
   }

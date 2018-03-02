@@ -72,7 +72,7 @@ export default class IssuesSourceViewer extends React.PureComponent<Props> {
     const { openIssue, selectedFlowIndex, selectedLocationIndex } = this.props;
 
     const locations =
-      selectedFlowIndex != null
+      selectedFlowIndex !== undefined
         ? openIssue.flows[selectedFlowIndex]
         : openIssue.flows.length > 0 ? openIssue.flows[0] : openIssue.secondaryLocations;
 
@@ -81,8 +81,8 @@ export default class IssuesSourceViewer extends React.PureComponent<Props> {
 
     // We don't want to display a location message when selected location is -1
     if (
-      locations != null &&
-      selectedLocationIndex != null &&
+      locations !== undefined &&
+      selectedLocationIndex !== undefined &&
       selectedLocationIndex >= 0 &&
       locations.length >= selectedLocationIndex
     ) {
@@ -97,7 +97,7 @@ export default class IssuesSourceViewer extends React.PureComponent<Props> {
     // otherwise show code around the open issue
     const aroundLine = locationLine || (openIssue.textRange && openIssue.textRange.endLine);
 
-    const allMessagesEmpty = locations != null && locations.every(location => !location.msg);
+    const allMessagesEmpty = locations !== undefined && locations.every(location => !location.msg);
 
     return (
       <div ref={node => (this.node = node)}>

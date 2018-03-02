@@ -32,7 +32,7 @@ interface Props {
   onChange: (changes: Partial<Query>) => void;
   onToggle: (property: string) => void;
   open: boolean;
-  severities: Array<string>;
+  severities: string[];
   stats: { [x: string]: number } | undefined;
 }
 

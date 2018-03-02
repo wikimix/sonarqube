@@ -38,7 +38,7 @@ export default class ConciseIssue extends React.PureComponent<Props> {
   render() {
     const { issue, previousIssue, selected } = this.props;
 
-    const displayComponent = previousIssue == null || previousIssue.component !== issue.component;
+    const displayComponent = !previousIssue || previousIssue.component !== issue.component;
 
     return (
       <div>

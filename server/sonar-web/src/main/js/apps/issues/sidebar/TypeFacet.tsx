@@ -33,7 +33,7 @@ interface Props {
   onToggle: (property: string) => void;
   open: boolean;
   stats: { [x: string]: number } | undefined;
-  types: Array<string>;
+  types: string[];
 }
 
 export default class TypeFacet extends React.PureComponent<Props> {

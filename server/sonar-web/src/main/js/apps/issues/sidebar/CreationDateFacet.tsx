@@ -253,37 +253,34 @@ export default class CreationDateFacet extends React.PureComponent<Props> {
           onClick={this.handlePeriodClick}
           value=""
         />
-        {component == null && (
-          <FacetItem
-            active={createdInLast === '1w'}
-            name={translate('issues.facet.createdAt.last_week')}
-            onClick={this.handlePeriodClick}
-            value="1w"
-          />
-        )}
-        {component == null && (
-          <FacetItem
-            active={createdInLast === '1m'}
-            name={translate('issues.facet.createdAt.last_month')}
-            onClick={this.handlePeriodClick}
-            value="1m"
-          />
-        )}
-        {component == null && (
-          <FacetItem
-            active={createdInLast === '1y'}
-            name={translate('issues.facet.createdAt.last_year')}
-            onClick={this.handlePeriodClick}
-            value="1y"
-          />
-        )}
-        {component != null && (
+        {component ? (
           <FacetItem
             active={sinceLeakPeriod}
             name={translate('issues.leak_period')}
             onClick={this.handleLeakPeriodClick}
             value=""
           />
+        ) : (
+          <>
+            <FacetItem
+              active={createdInLast === '1w'}
+              name={translate('issues.facet.createdAt.last_week')}
+              onClick={this.handlePeriodClick}
+              value="1w"
+            />
+            <FacetItem
+              active={createdInLast === '1m'}
+              name={translate('issues.facet.createdAt.last_month')}
+              onClick={this.handlePeriodClick}
+              value="1m"
+            />
+            <FacetItem
+              active={createdInLast === '1y'}
+              name={translate('issues.facet.createdAt.last_year')}
+              onClick={this.handlePeriodClick}
+              value="1y"
+            />
+          </>
         )}
       </div>
     );

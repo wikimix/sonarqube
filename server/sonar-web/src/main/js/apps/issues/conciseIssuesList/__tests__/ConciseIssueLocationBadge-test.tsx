@@ -22,5 +22,5 @@ import { shallow } from 'enzyme';
 import ConciseIssueLocationBadge from '../ConciseIssueLocationBadge';
 
 it('should render', () => {
-  expect(shallow(<ConciseIssueLocationBadge count={7} />)).toMatchSnapshot();
+  expect(shallow(<ConciseIssueLocationBadge count={7} selected={false} />)).toMatchSnapshot();
 });

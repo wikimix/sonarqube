@@ -23,7 +23,7 @@ import { translate } from '../../../helpers/l10n';
 
 interface Props {
   className?: string;
-  current?: number;
+  current: number | undefined;
   total: number;
 }
 
