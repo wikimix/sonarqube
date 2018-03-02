@@ -22,6 +22,7 @@ import Helmet from 'react-helmet';
 import * as key from 'keymaster';
 import { keyBy, without } from 'lodash';
 import * as PropTypes from 'prop-types';
+import * as classNames from 'classnames';
 import BulkChangeModal from './BulkChangeModal';
 import ComponentBreadcrumbs from './ComponentBreadcrumbs';
 import IssuesList from './IssuesList';
@@ -54,7 +55,9 @@ import handleRequiredAuthentication from '../../../app/utils/handleRequiredAuthe
 import EmptySearch from '../../../components/common/EmptySearch';
 import FiltersHeader from '../../../components/common/FiltersHeader';
 import ScreenPositionHelper from '../../../components/common/ScreenPositionHelper';
+import Dropdown from '../../../components/controls/Dropdown';
 import ListFooter from '../../../components/controls/ListFooter';
+import { Button } from '../../../components/ui/buttons';
 import { getBranchName, isShortLivingBranch } from '../../../helpers/branches';
 import { translate, translateWithParameters } from '../../../helpers/l10n';
 import { RawQuery } from '../../../helpers/query';
@@ -484,7 +487,7 @@ export default class App extends React.PureComponent<Props, State> {
     );
   };
 
-  fetchIssuesForComponent = (_component: string, _from: number, to: number): Promise<Issue[]> => {
+  fetchIssuesForComponent = (_component: string, _from: number, to: number) => {
     const { issues, openIssue, paging } = this.state;
 
     if (!openIssue || !paging) {
@@ -541,18 +544,9 @@ export default class App extends React.PureComponent<Props, State> {
               ...state.referencedComponents,
               ...keyBy(other.components, 'uuid')
             },
-            referencedLanguages: {
-              ...state.referencedLanguages,
-              ...keyBy(other.languages, 'key')
-            },
-            referencedRules: {
-              ...state.referencedRules,
-              ...keyBy(other.rules, 'key')
-            },
-            referencedUsers: {
-              ...state.referencedUsers,
-              ...keyBy(other.users, 'login')
-            }
+            referencedLanguages: { ...state.referencedLanguages, ...keyBy(other.languages, 'key') },
+            referencedRules: { ...state.referencedRules, ...keyBy(other.rules, 'key') },
+            referencedUsers: { ...state.referencedUsers, ...keyBy(other.users, 'login') }
           }));
         }
       },
@@ -671,9 +665,9 @@ export default class App extends React.PureComponent<Props, State> {
     this.openBulkChange('all');
   };
 
-  handleBulkChangeSelectedClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
-    e.preventDefault();
-    e.currentTarget.blur();
+  handleBulkChangeSelectedClick = (event: React.MouseEvent<HTMLAnchorElement>) => {
+    event.preventDefault();
+    event.currentTarget.blur();
     this.openBulkChange('selected');
   };
 
@@ -690,19 +684,39 @@ export default class App extends React.PureComponent<Props, State> {
   };
 
   handleReloadAndOpenFirst = () => {
-    this.fetchFirstIssues().then(issues => {
-      if (issues.length > 0) {
-        this.openIssue(issues[0].key);
-      }
-    });
+    this.fetchFirstIssues().then(
+      issues => {
+        if (issues.length > 0) {
+          this.openIssue(issues[0].key);
+        }
+      },
+      () => {}
+    );
   };
 
-  selectLocation = (index?: number) => this.setState(actions.selectLocation(index));
-  selectNextLocation = () => this.setState(actions.selectNextLocation);
-  selectPreviousLocation = () => this.setState(actions.selectPreviousLocation);
-  selectFlow = (index?: number) => this.setState(actions.selectFlow(index));
-  selectNextFlow = () => this.setState(actions.selectNextFlow);
-  selectPreviousFlow = () => this.setState(actions.selectPreviousFlow);
+  selectLocation = (index?: number) => {
+    this.setState(actions.selectLocation(index));
+  };
+
+  selectNextLocation = () => {
+    this.setState(actions.selectNextLocation);
+  };
+
+  selectPreviousLocation = () => {
+    this.setState(actions.selectPreviousLocation);
+  };
+
+  selectFlow = (index?: number) => {
+    this.setState(actions.selectFlow(index));
+  };
+
+  selectNextFlow = () => {
+    this.setState(actions.selectNextFlow);
+  };
+
+  selectPreviousFlow = () => {
+    this.setState(actions.selectPreviousFlow);
+  };
 
   renderBulkChange(openIssue: Issue | undefined) {
     const { component, currentUser } = this.props;
@@ -715,28 +729,32 @@ export default class App extends React.PureComponent<Props, State> {
     return (
       <div className="pull-left">
         {checked.length > 0 ? (
-          <div className="dropdown">
-            <button id="issues-bulk-change" data-toggle="dropdown">
-              {translate('bulk_change')}
-              <i className="icon-dropdown little-spacer-left" />
-            </button>
-            <ul className="dropdown-menu">
-              <li>
-                <a href="#" onClick={this.handleBulkChangeClick}>
-                  {translateWithParameters('issues.bulk_change', paging ? paging.total : 0)}
-                </a>
-              </li>
-              <li>
-                <a href="#" onClick={this.handleBulkChangeSelectedClick}>
-                  {translateWithParameters('issues.bulk_change_selected', checked.length)}
-                </a>
-              </li>
-            </ul>
-          </div>
+          <Dropdown>
+            {({ onToggleClick, open }) => (
+              <div className={classNames('dropdown', { open })}>
+                <Button data-toggle="dropdown" id="issues-bulk-change" onClick={onToggleClick}>
+                  {translate('bulk_change')}
+                  <i className="icon-dropdown little-spacer-left" />
+                </Button>
+                <ul className="dropdown-menu">
+                  <li>
+                    <a href="#" onClick={this.handleBulkChangeClick}>
+                      {translateWithParameters('issues.bulk_change', paging ? paging.total : 0)}
+                    </a>
+                  </li>
+                  <li>
+                    <a href="#" onClick={this.handleBulkChangeSelectedClick}>
+                      {translateWithParameters('issues.bulk_change_selected', checked.length)}
+                    </a>
+                  </li>
+                </ul>
+              </div>
+            )}
+          </Dropdown>
         ) : (
-          <button id="issues-bulk-change" onClick={this.handleBulkChangeClick}>
+          <Button id="issues-bulk-change" onClick={this.handleBulkChangeClick}>
             {translate('bulk_change')}
-          </button>
+          </Button>
         )}
         {bulkChange && (
           <BulkChangeModal

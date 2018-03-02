@@ -18,6 +18,7 @@
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 import * as React from 'react';
+import { Button } from '../../../components/ui/buttons';
 import { translate } from '../../../helpers/l10n';
 
 interface Props {
@@ -26,9 +27,7 @@ interface Props {
 }
 
 export default class MyIssuesFilter extends React.PureComponent<Props> {
-  handleClick = (myIssues: boolean) => (event: React.MouseEvent<HTMLButtonElement>) => {
-    event.preventDefault();
-    event.currentTarget.blur();
+  handleClick = (myIssues: boolean) => () => {
     this.props.onMyIssuesChange(myIssues);
   };
 
@@ -38,16 +37,16 @@ export default class MyIssuesFilter extends React.PureComponent<Props> {
     return (
       <div className="issues-my-issues-filter">
         <div className="button-group">
-          <button
+          <Button
             className={myIssues ? 'button-active' : undefined}
             onClick={this.handleClick(true)}>
             {translate('issues.my_issues')}
-          </button>
-          <button
+          </Button>
+          <Button
             className={myIssues ? undefined : 'button-active'}
             onClick={this.handleClick(false)}>
             {translate('all')}
-          </button>
+          </Button>
         </div>
       </div>
     );
