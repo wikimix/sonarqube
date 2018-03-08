@@ -23,8 +23,11 @@ import { Branch } from '../../app/types';
 import Level from '../ui/Level';
 import BugIcon from '../icons-components/BugIcon';
 import CodeSmellIcon from '../icons-components/CodeSmellIcon';
+import HelpIcon from '../icons-components/HelpIcon';
+import Tooltip from '../controls/Tooltip';
 import VulnerabilityIcon from '../icons-components/VulnerabilityIcon';
 import { isShortLivingBranch } from '../../helpers/branches';
+import { translateWithParameters } from '../../helpers/l10n';
 import './BranchStatus.css';
 
 interface Props {
@@ -40,8 +43,8 @@ export default function BranchStatus({ branch, concise = false }: Props) {
 
     const totalIssues =
       branch.status.bugs + branch.status.vulnerabilities + branch.status.codeSmells;
-
-    const indicatorColor = totalIssues > 0 ? 'red' : 'green';
+    const indicatorColor = getQualityGateColor(branch.status.qualityGateStatus);
+    const shouldDisplayHelper = branch.status.qualityGateStatus === 'OK' && totalIssues > 0;
 
     return concise ? (
       <ul className="branch-status">
@@ -52,21 +55,33 @@ export default function BranchStatus({ branch, concise = false }: Props) {
       </ul>
     ) : (
       <ul className="branch-status">
-        <li className="spacer-right">
+        <li className="little-spacer-right">
           <StatusIndicator color={indicatorColor} size="small" />
         </li>
         <li className="spacer-left">
           {branch.status.bugs}
-          <BugIcon />
+          <BugIcon className="little-spacer-left" />
         </li>
         <li className="spacer-left">
           {branch.status.vulnerabilities}
-          <VulnerabilityIcon />
+          <VulnerabilityIcon className="little-spacer-left" />
         </li>
         <li className="spacer-left">
           {branch.status.codeSmells}
-          <CodeSmellIcon />
+          <CodeSmellIcon className="little-spacer-left" />
         </li>
+        {shouldDisplayHelper && (
+          <Tooltip
+            overlay={translateWithParameters(
+              'branches.short_lived.quality_gate.description',
+              totalIssues
+            )}
+            placement="right">
+            <li className="spacer-left">
+              <HelpIcon className="text-info" />
+            </li>
+          </Tooltip>
+        )}
       </ul>
     );
   } else {
@@ -76,4 +91,16 @@ export default function BranchStatus({ branch, concise = false }: Props) {
 
     return <Level level={branch.status.qualityGateStatus} small={true} />;
   }
+}
+
+function getQualityGateColor(status: string) {
+  let indicatorColor = 'gray';
+  if (status === 'ERROR') {
+    indicatorColor = 'red';
+  } else if (status === 'WARN') {
+    indicatorColor = 'orange';
+  } else if (status === 'OK') {
+    indicatorColor = 'green';
+  }
+  return indicatorColor;
 }

@@ -428,6 +428,7 @@ export interface ShortLivingBranch {
   status?: {
     bugs: number;
     codeSmells: number;
+    qualityGateStatus: string;
     vulnerabilities: number;
   };
   type: BranchType.SHORT;
