@@ -170,11 +170,7 @@ function getVisualization(value: string): string | undefined {
 }
 
 function convertIssuesRating(metric: string, rating: number): string {
-  if (rating > 1 && rating < 5) {
-    return `${metric} >= ${rating}`;
-  } else {
-    return `${metric} = ${rating}`;
-  }
+  return `${metric} = ${rating}`;
 }
 
 function convertCoverage(metric: string, coverage: number): string {
@@ -182,11 +178,11 @@ function convertCoverage(metric: string, coverage: number): string {
     case 1:
       return metric + ' >= 80';
     case 2:
-      return metric + ' < 80';
+      return metric + ' < 80 && ' + metric + ' >= 70';
     case 3:
-      return metric + ' < 70';
+      return metric + ' < 70 && ' + metric + ' >= 50';
     case 4:
-      return metric + ' < 50';
+      return metric + ' < 50 && ' + metric + ' >= 30';
     case 5:
       return metric + ' < 30';
     case 6:
@@ -201,11 +197,11 @@ function convertDuplications(metric: string, duplications: number): string {
     case 1:
       return metric + ' < 3';
     case 2:
-      return metric + ' >= 3';
+      return metric + ' >= 3 && ' + metric + ' < 5';
     case 3:
-      return metric + ' >= 5';
+      return metric + ' >= 5 && ' + metric + ' < 10';
     case 4:
-      return metric + ' >= 10';
+      return metric + ' >= 10 && ' + metric + ' < 20';
     case 5:
       return metric + ' >= 20';
     case 6:
@@ -220,11 +216,11 @@ function convertSize(metric: string, size: number): string {
     case 1:
       return metric + ' < 1000';
     case 2:
-      return metric + ' >= 1000';
+      return metric + ' >= 1000 && ' + metric + ' < 10000';
     case 3:
-      return metric + ' >= 10000';
+      return metric + ' >= 10000 && ' + metric + ' < 100000';
     case 4:
-      return metric + ' >= 100000';
+      return metric + ' >= 100000 && ' + metric + ' < 500000';
     case 5:
       return metric + ' >= 500000';
     default:

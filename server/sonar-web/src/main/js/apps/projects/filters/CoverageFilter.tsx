@@ -39,7 +39,6 @@ export interface Props {
 
 export default function CoverageFilter(props: Props) {
   const { property = 'coverage' } = props;
-
   return (
     <Filter
       facet={props.facet}

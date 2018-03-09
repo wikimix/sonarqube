@@ -103,7 +103,7 @@ export default class Filter extends React.PureComponent<Props> {
   }
 
   renderOption(option: Option) {
-    const { facet, getFacetValueForOption, value } = this.props;
+    const { facet, getFacetValueForOption } = this.props;
     const className = classNames(
       'facet',
       'search-navigator-facet',
@@ -118,16 +118,10 @@ export default class Filter extends React.PureComponent<Props> {
     const facetValue =
       facet && getFacetValueForOption ? getFacetValueForOption(facet, option) : undefined;
 
-    const isUnderSelectedOption =
-      typeof value === 'number' &&
-      typeof option === 'number' &&
-      this.highlightUnder(value) &&
-      option > value;
-
     return (
       <a className={className} data-key={option} href="#" key={option} onClick={this.handleClick}>
         <span className="facet-name">
-          {this.props.renderOption(option, this.isSelected(option) || isUnderSelectedOption)}
+          {this.props.renderOption(option, this.isSelected(option))}
         </span>
         {facetValue != null && (
           <span className="facet-stat">
