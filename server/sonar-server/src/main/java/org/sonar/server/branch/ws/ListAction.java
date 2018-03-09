@@ -30,8 +30,6 @@ import javax.annotation.Nullable;
 import org.sonar.api.server.ws.Request;
 import org.sonar.api.server.ws.Response;
 import org.sonar.api.server.ws.WebService;
-import org.sonar.api.web.UserRole;
-import org.sonar.core.util.Protobuf;
 import org.sonar.db.DbClient;
 import org.sonar.db.DbSession;
 import org.sonar.db.component.BranchDto;
@@ -39,12 +37,10 @@ import org.sonar.db.component.BranchType;
 import org.sonar.db.component.ComponentDto;
 import org.sonar.db.component.SnapshotDto;
 import org.sonar.db.measure.LiveMeasureDto;
-import org.sonar.db.permission.OrganizationPermission;
 import org.sonar.server.component.ComponentFinder;
 import org.sonar.server.issue.index.BranchStatistics;
 import org.sonar.server.issue.index.IssueIndex;
 import org.sonar.server.user.UserSession;
-import org.sonar.server.ws.WsUtils;
 import org.sonarqube.ws.Common;
 import org.sonarqube.ws.ProjectBranches;
 
@@ -53,15 +49,18 @@ import static java.util.Collections.singletonList;
 import static org.sonar.api.measures.CoreMetrics.ALERT_STATUS_KEY;
 import static org.sonar.api.resources.Qualifiers.PROJECT;
 import static org.sonar.api.utils.DateUtils.formatDateTime;
+import static org.sonar.api.web.UserRole.USER;
 import static org.sonar.core.permission.GlobalPermissions.SCAN_EXECUTION;
 import static org.sonar.core.util.Protobuf.setNullable;
 import static org.sonar.core.util.stream.MoreCollectors.toList;
 import static org.sonar.core.util.stream.MoreCollectors.uniqueIndex;
 import static org.sonar.db.component.BranchType.SHORT;
+import static org.sonar.db.permission.OrganizationPermission.SCAN;
 import static org.sonar.server.branch.ws.BranchesWs.addProjectParam;
 import static org.sonar.server.branch.ws.ProjectBranchesParameters.ACTION_LIST;
 import static org.sonar.server.branch.ws.ProjectBranchesParameters.PARAM_PROJECT;
 import static org.sonar.server.user.AbstractUserSession.insufficientPrivilegesException;
+import static org.sonar.server.ws.WsUtils.writeProtobuf;
 
 public class ListAction implements BranchWsAction {
 
@@ -116,7 +115,8 @@ public class ListAction implements BranchWsAction {
       ProjectBranches.ListWsResponse.Builder protobufResponse = ProjectBranches.ListWsResponse.newBuilder();
       branches.forEach(b -> addBranch(protobufResponse, b, mergeBranchesByUuid, qualityGateMeasuresByComponentUuids.get(b.getUuid()), branchStatisticsByBranchUuid.get(b.getUuid()),
           analysisDateByBranchUuid.get(b.getUuid())));
-      WsUtils.writeProtobuf(protobufResponse.build(), request, response);
+
+      writeProtobuf(protobufResponse.build(), request, response);
     }
   }
 
@@ -151,7 +151,7 @@ public class ListAction implements BranchWsAction {
                                       @Nullable BranchStatistics branchStatistics) {
     ProjectBranches.Branch.Status.Builder statusBuilder = ProjectBranches.Branch.Status.newBuilder();
     if (qualityGateMeasure != null) {
-      Protobuf.setNullable(qualityGateMeasure.getDataAsString(), statusBuilder::setQualityGateStatus);
+      setNullable(qualityGateMeasure.getDataAsString(), statusBuilder::setQualityGateStatus);
     }
     if (branch.getBranchType() == BranchType.SHORT) {
       statusBuilder.setBugs(branchStatistics == null ? 0L : branchStatistics.getBugs());
@@ -162,9 +162,9 @@ public class ListAction implements BranchWsAction {
   }
 
   private void checkPermission(ComponentDto component) {
-    if (!userSession.hasComponentPermission(UserRole.USER, component) &&
+    if (!userSession.hasComponentPermission(USER, component) &&
       !userSession.hasComponentPermission(SCAN_EXECUTION, component) &&
-      !userSession.hasPermission(OrganizationPermission.SCAN, component.getOrganizationUuid())) {
+      !userSession.hasPermission(SCAN, component.getOrganizationUuid())) {
       throw insufficientPrivilegesException();
     }
   }
