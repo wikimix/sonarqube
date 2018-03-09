@@ -37,20 +37,20 @@ exports[`highlights under 1`] = `
           2
         </span>
       </a>
-      <a
-        className="facet search-navigator-facet projects-facet"
-        data-key={3}
-        href="#"
-        key="3"
-        onClick={[Function]}
-      >
-        <span
-          className="facet-name"
-        >
-          3
-        </span>
-      </a>
     </div>
+    <a
+      className="facet search-navigator-facet projects-facet"
+      data-key={3}
+      href="#"
+      key="3"
+      onClick={[Function]}
+    >
+      <span
+        className="facet-name"
+      >
+        3
+      </span>
+    </a>
   </div>
 </div>
 `;
@@ -92,20 +92,20 @@ exports[`hightlights under selected 1`] = `
           2
         </span>
       </a>
-      <a
-        className="facet search-navigator-facet projects-facet"
-        data-key={3}
-        href="#"
-        key="3"
-        onClick={[Function]}
-      >
-        <span
-          className="facet-name"
-        >
-          3
-        </span>
-      </a>
     </div>
+    <a
+      className="facet search-navigator-facet projects-facet"
+      data-key={3}
+      href="#"
+      key="3"
+      onClick={[Function]}
+    >
+      <span
+        className="facet-name"
+      >
+        3
+      </span>
+    </a>
   </div>
 </div>
 `;

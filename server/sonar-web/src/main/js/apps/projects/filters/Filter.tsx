@@ -143,10 +143,9 @@ export default class Filter extends React.PureComponent<Props> {
     const { options, highlightUnder } = this.props;
     if (options && options.length > 0) {
       if (highlightUnder != null) {
-        const max = this.props.highlightUnderMax || options.length;
         const beforeHighlight = options.slice(0, highlightUnder);
-        const insideHighlight = options.slice(highlightUnder, max);
-        const afterHighlight = options.slice(max);
+        const insideHighlight = options.slice(highlightUnder, highlightUnder + 1);
+        const afterHighlight = options.slice(highlightUnder + 1);
         return (
           <div className="search-navigator-facet-list projects-facet-list">
             {beforeHighlight.map(option => this.renderOption(option))}
