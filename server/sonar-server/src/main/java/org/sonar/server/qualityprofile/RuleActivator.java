@@ -177,54 +177,44 @@ public class RuleActivator {
    * On custom rules, it's always rule parameters that are used
    */
   private void applySeverityAndParamToChange(RuleActivation request, RuleActivatorContext context, ActiveRuleChange change) {
+    String severity;
     if (request.isReset()) {
       // load severity and params from parent profile, else from default values
-      change.setSeverity(firstNonNull(
-        context.parentSeverity(), context.defaultSeverity()));
-      for (RuleParamDto ruleParamDto : context.ruleParams()) {
-        String paramKey = ruleParamDto.getName();
-        change.setParameter(paramKey, validateParam(ruleParamDto, firstNonNull(
-          context.parentParamValue(paramKey), context.defaultParamValue(paramKey))));
-      }
+      severity = firstNonNull(context.parentSeverity(), context.defaultSeverity());
+    } else if (context.getRulesProfile().isBuiltIn()) {
+      severity = firstNonNull(request.getSeverity(), context.defaultSeverity());
+    } else {
+      // load severity from request, else keep existing one (if already activated), else from parent, else from default
+      severity = firstNonNull(request.getSeverity(), context.currentSeverity(), context.parentSeverity(), context.defaultSeverity());
+    }
+    change.setSeverity(severity);
 
-    } else if (context.activeRule() != null) {
-      // already activated -> load severity and parameters from request, else keep existing ones, else from parent,
-      // else from default
-      change.setSeverity(firstNonNull(
-        request.getSeverity(),
-        context.currentSeverity(),
-        context.parentSeverity(),
-        context.defaultSeverity()));
-      for (RuleParamDto ruleParamDto : context.ruleParams()) {
-        String paramKey = ruleParamDto.getName();
-        String paramValue = context.hasRequestParamValue(request, paramKey) ?
-        // If the request contains the parameter then we're using either value from request, or parent value, or default value
+    for (RuleParamDto ruleParamDto : context.ruleParams()) {
+      String paramKey = ruleParamDto.getName();
+      String paramValue;
+      if (request.isReset()) {
+        // load params from parent profile, else from default values
+        paramValue = firstNonNull(context.parentParamValue(paramKey), context.defaultParamValue(paramKey));
+      } else if (context.getRulesProfile().isBuiltIn()) {
+        // use the value defined in the profile definition, else the rule default value
+        paramValue = firstNonNull(context.requestParamValue(request, paramKey), context.defaultParamValue(paramKey));
+      } else {
+        paramValue = context.hasRequestParamValue(request, paramKey) ?
+          // If the request contains the parameter then we're using either value from request, or parent value, or default value
           firstNonNull(
             context.requestParamValue(request, paramKey),
             context.parentParamValue(paramKey),
             context.defaultParamValue(paramKey))
+
           // If the request doesn't contain the parameter, then we're using either value in DB, or parent value, or default value
           : firstNonNull(
-            context.currentParamValue(paramKey),
-            context.parentParamValue(paramKey),
-            context.defaultParamValue(paramKey));
+          context.currentParamValue(paramKey),
+          context.parentParamValue(paramKey),
+          context.defaultParamValue(paramKey));
+
         change.setParameter(paramKey, validateParam(ruleParamDto, paramValue));
       }
-
-    } else if (context.activeRule() == null) {
-      // not activated -> load severity and parameters from request, else from parent, else from defaults
-      change.setSeverity(firstNonNull(
-        request.getSeverity(),
-        context.parentSeverity(),
-        context.defaultSeverity()));
-      for (RuleParamDto ruleParamDto : context.ruleParams()) {
-        String paramKey = ruleParamDto.getName();
-        change.setParameter(paramKey, validateParam(ruleParamDto,
-          firstNonNull(
-            context.requestParamValue(request, paramKey),
-            context.parentParamValue(paramKey),
-            context.defaultParamValue(paramKey))));
-      }
+      change.setParameter(paramKey, validateParam(ruleParamDto, firstNonNull(paramValue)));
     }
   }
 
