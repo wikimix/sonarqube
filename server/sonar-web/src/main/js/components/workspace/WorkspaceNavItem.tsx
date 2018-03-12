@@ -41,7 +41,7 @@ export default class WorkspaceNavItem extends React.PureComponent<Props> {
           {this.props.children}
         </a>
         <ButtonIcon
-          className="js-close workspace-header-icon button-small little-spacer-left"
+          className="js-close workspace-nav-item-close workspace-header-icon button-small little-spacer-left"
           color="#fff"
           onClick={this.props.onClose}>
           <ClearIcon fill={undefined} size={12} />

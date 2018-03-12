@@ -30,26 +30,33 @@
 }
 
 .workspace-nav-item {
+  position: relative;
   display: inline-flex;
   align-items: center;
   margin-right: var(--gridSize);
-  padding: 0 var(--gridSize);
-  background-color: var(--gray40);
 }
 
 .workspace-nav-item-link {
   display: inline-flex;
   align-items: center;
   height: 28px;
+  padding: 0 calc(3.5 * var(--gridSize)) 0 var(--gridSize);
   border: none;
+  background-color: var(--gray40);
   color: #fff;
   font-size: var(--smallFontSize);
 }
 
-.workspace-nav-item > i {
-  position: relative;
-  top: -2px;
-  vertical-align: middle;
+.workspace-nav-item-link:hover,
+.workspace-nav-item-link:focus {
+  color: #fff;
+  opacity: 0.9;
+}
+
+.workspace-nav-item-close {
+  position: absolute;
+  right: 4px;
+  top: 4px;
 }
 
 .workspace-viewer {
