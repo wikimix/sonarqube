@@ -22,10 +22,9 @@ build/
 src/main/webapp/js/
 src/main/webapp/css/
 src/main/webapp/index.html
-src/main/webapp/integration/**/js/
-src/main/webapp/integration/**/css/
-src/main/webapp/integration/**/*.html
+src/main/webapp/integration/
 src/main/webapp/WEB-INF/lib/*.jar
+src/main/webapp/META-INF/
 
 # tests
 src/test/json/**/*.png
