@@ -18,30 +18,32 @@
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 import * as React from 'react';
-import { ComponentDescriptor } from './context';
-import WorkspaceComponentTitle from './WorkspaceComponentTitle';
-import WorkspaceNavItem from './WorkspaceNavItem';
+import { shallow } from 'enzyme';
+import WorkspaceNavItem, { Props } from '../WorkspaceNavItem';
+import { click } from '../../../helpers/testUtils';
 
-export interface Props {
-  component: ComponentDescriptor;
-  onClose: (componentKey: string) => void;
-  onOpen: (componentKey: string) => void;
-}
+it('should render', () => {
+  expect(shallowRender()).toMatchSnapshot();
+});
 
-export default class WorkspaceNavComponent extends React.PureComponent<Props> {
-  handleClose = () => {
-    this.props.onClose(this.props.component.key);
-  };
+it('should close', () => {
+  const onClose = jest.fn();
+  const wrapper = shallowRender({ onClose });
+  click(wrapper.find('ButtonIcon'));
+  expect(onClose).toBeCalled();
+});
 
-  handleOpen = () => {
-    this.props.onOpen(this.props.component.key);
-  };
+it('should open', () => {
+  const onOpen = jest.fn();
+  const wrapper = shallowRender({ onOpen });
+  click(wrapper.find('.workspace-nav-item-link'));
+  expect(onOpen).toBeCalled();
+});
 
-  render() {
-    return (
-      <WorkspaceNavItem onClose={this.handleClose} onOpen={this.handleOpen}>
-        <WorkspaceComponentTitle component={this.props.component} limited={true} />
-      </WorkspaceNavItem>
-    );
-  }
+function shallowRender(props?: Partial<Props>) {
+  return shallow(
+    <WorkspaceNavItem onClose={jest.fn()} onOpen={jest.fn()} {...props}>
+      <div id="workspace-nav-item" />
+    </WorkspaceNavItem>
+  );
 }

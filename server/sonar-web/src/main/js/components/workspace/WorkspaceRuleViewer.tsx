@@ -40,10 +40,6 @@ export default class WorkspaceRuleViewer extends React.PureComponent<Props> {
     this.props.onLoad({ key: this.props.rule.key, name: rule.name });
   };
 
-  renderHeaderTitle = () => {
-    return <WorkspaceRuleTitle rule={this.props.rule} />;
-  };
-
   render() {
     const { rule } = this.props;
 

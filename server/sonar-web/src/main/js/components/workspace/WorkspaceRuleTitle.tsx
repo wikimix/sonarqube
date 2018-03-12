@@ -21,14 +21,16 @@ import * as React from 'react';
 import { RuleDescriptor } from './context';
 
 interface Props {
+  limited?: boolean;
   rule: RuleDescriptor;
 }
 
-export default function WorkspaceRuleTitle({ rule }: Props) {
+export default function WorkspaceRuleTitle({ limited, rule }: Props) {
+  const { name = '—' } = rule;
   return (
     <>
       <i className="icon-workspace-doc little-spacer-right" />
-      <span className="text-limited">{rule.name || '—'}</span>
+      {limited ? <span className="text-limited">{name}</span> : name}
     </>
   );
 }

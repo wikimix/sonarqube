@@ -19,9 +19,8 @@
  */
 import * as React from 'react';
 import { RuleDescriptor } from './context';
+import WorkspaceNavItem from './WorkspaceNavItem';
 import WorkspaceRuleTitle from './WorkspaceRuleTitle';
-import ClearIcon from '../icons-components/ClearIcon';
-import { ButtonIcon } from '../ui/buttons';
 
 export interface Props {
   rule: RuleDescriptor;
@@ -30,31 +29,19 @@ export interface Props {
 }
 
 export default class WorkspaceNavRule extends React.PureComponent<Props> {
-  handleCloseClick = () => {
+  handleClose = () => {
     this.props.onClose(this.props.rule.key);
   };
 
-  handleNameClick = (event: React.MouseEvent<HTMLAnchorElement>) => {
-    event.preventDefault();
-    event.currentTarget.blur();
+  handleOpen = () => {
     this.props.onOpen(this.props.rule.key);
   };
 
   render() {
-    const { rule } = this.props;
-
     return (
-      <li className="workspace-nav-item">
-        <a className="workspace-nav-item-link" href="#" onClick={this.handleNameClick}>
-          <WorkspaceRuleTitle rule={rule} />
-        </a>
-        <ButtonIcon
-          className="js-close workspace-header-icon button-small little-spacer-left"
-          color="#fff"
-          onClick={this.handleCloseClick}>
-          <ClearIcon fill={undefined} size={12} />
-        </ButtonIcon>
-      </li>
+      <WorkspaceNavItem onClose={this.handleClose} onOpen={this.handleOpen}>
+        <WorkspaceRuleTitle limited={true} rule={this.props.rule} />
+      </WorkspaceNavItem>
     );
   }
 }

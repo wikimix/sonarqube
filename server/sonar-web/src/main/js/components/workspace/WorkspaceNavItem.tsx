@@ -18,30 +18,35 @@
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 import * as React from 'react';
-import { ComponentDescriptor } from './context';
-import WorkspaceComponentTitle from './WorkspaceComponentTitle';
-import WorkspaceNavItem from './WorkspaceNavItem';
+import ClearIcon from '../icons-components/ClearIcon';
+import { ButtonIcon } from '../ui/buttons';
 
 export interface Props {
-  component: ComponentDescriptor;
-  onClose: (componentKey: string) => void;
-  onOpen: (componentKey: string) => void;
+  children: React.ReactNode;
+  onClose: () => void;
+  onOpen: () => void;
 }
 
-export default class WorkspaceNavComponent extends React.PureComponent<Props> {
-  handleClose = () => {
-    this.props.onClose(this.props.component.key);
-  };
-
-  handleOpen = () => {
-    this.props.onOpen(this.props.component.key);
+export default class WorkspaceNavItem extends React.PureComponent<Props> {
+  handleNameClick = (event: React.MouseEvent<HTMLAnchorElement>) => {
+    event.preventDefault();
+    event.currentTarget.blur();
+    this.props.onOpen();
   };
 
   render() {
     return (
-      <WorkspaceNavItem onClose={this.handleClose} onOpen={this.handleOpen}>
-        <WorkspaceComponentTitle component={this.props.component} limited={true} />
-      </WorkspaceNavItem>
+      <li className="workspace-nav-item">
+        <a className="workspace-nav-item-link" href="#" onClick={this.handleNameClick}>
+          {this.props.children}
+        </a>
+        <ButtonIcon
+          className="js-close workspace-header-icon button-small little-spacer-left"
+          color="#fff"
+          onClick={this.props.onClose}>
+          <ClearIcon fill={undefined} size={12} />
+        </ButtonIcon>
+      </li>
     );
   }
 }

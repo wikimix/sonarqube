@@ -20,7 +20,6 @@
 import * as React from 'react';
 import { shallow } from 'enzyme';
 import WorkspaceNavRule, { Props } from '../WorkspaceNavRule';
-import { click } from '../../../helpers/testUtils';
 
 it('should render', () => {
   expect(shallowRender()).toMatchSnapshot();
@@ -29,14 +28,14 @@ it('should render', () => {
 it('should close', () => {
   const onClose = jest.fn();
   const wrapper = shallowRender({ onClose });
-  click(wrapper.find('ButtonIcon'));
+  wrapper.find('WorkspaceNavItem').prop<Function>('onClose')();
   expect(onClose).toBeCalledWith('foo');
 });
 
 it('should open', () => {
   const onOpen = jest.fn();
   const wrapper = shallowRender({ onOpen });
-  click(wrapper.find('.workspace-nav-item-link'));
+  wrapper.find('WorkspaceNavItem').prop<Function>('onOpen')();
   expect(onOpen).toBeCalledWith('foo');
 });
 

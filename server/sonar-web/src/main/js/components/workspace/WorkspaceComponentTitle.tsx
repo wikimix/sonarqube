@@ -24,15 +24,17 @@ import { collapsePath } from '../../helpers/path';
 
 interface Props {
   component: ComponentDescriptor;
+  limited?: boolean;
 }
 
-export default function WorkspaceComponentTitle({ component }: Props) {
+export default function WorkspaceComponentTitle({ component, limited }: Props) {
+  const { name = '—' } = component;
   return (
     <>
       {component.qualifier && (
         <QualifierIcon className="little-spacer-right" qualifier={component.qualifier} />
       )}
-      {component.name ? collapsePath(component.name, 15) : '—'}
+      {limited ? collapsePath(name, 15) : name}
     </>
   );
 }
