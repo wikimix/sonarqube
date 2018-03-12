@@ -153,7 +153,8 @@ public class PluginsTest {
     // installPlugin(builder, "vb");
     // FIXME vbnet is disabled as latest release is not using new license manager installPlugin(builder, "vbnet");
     installPlugin(builder, "web");
-    installPlugin(builder, "xanitizer");
+    // Disabled since it's not available for LTS
+    // installPlugin(builder, "xanitizer");
     installPlugin(builder, "xml");
 
     activateLicenses(builder);
