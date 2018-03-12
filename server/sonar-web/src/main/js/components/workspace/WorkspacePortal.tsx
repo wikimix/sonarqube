@@ -20,12 +20,10 @@
 import * as React from 'react';
 import { createPortal } from 'react-dom';
 
-interface Props {}
-
-export default class WorkspacePortal extends React.PureComponent<Props> {
+export default class WorkspacePortal extends React.PureComponent {
   el: HTMLElement;
 
-  constructor(props: Props) {
+  constructor(props: {}) {
     super(props);
     this.el = document.createElement('div');
     this.el.classList.add('workspace');
