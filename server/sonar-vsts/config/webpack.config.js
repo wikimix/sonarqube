@@ -64,7 +64,7 @@ module.exports = ({ production = true, fast = false }) => ({
             loader: 'awesome-typescript-loader',
             options: {
               transpileOnly: true,
-              useBabel: true,
+              useBabel: false,
               useCache: true
             }
           }
